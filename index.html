@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>EchoLogz</title>
+
+    <link rel="stylesheet" href="style.css" />
+
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+
+    <!-- Don't use this in production: -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="text/babel">
+      const {useState} = React;
+
+      function Placeholder({label}){
+        return (
+          <div style={{opacity:0.9}} className="muted">{label}</div>
+        )
+      }
+
+      function EchoLogzMockup(){
+        const [sessionCode, setSessionCode] = useState('');
+        const [playlistUrl, setPlaylistUrl] = useState('');
+        const [joined, setJoined] = useState(false);
+        const [oauthConnected, setOauthConnected] = useState(false);
+        const [signedIn, setSignedIn] = useState(false);
+        const username = "Duncan";
+
+        // Example compatability results
+        const compatibility = 78;
+        const mockIdentityA = {name:'You', features:[ 'Indie', 'Acoustic', 'Low Energy', 'Warm Keys' ]}
+        const mockIdentityB = {name:'Match', features:['Alt Rock','High Energy','Electronic','Danceable']}
+
+        function createSession(){
+          // Generate a code and store it in state so JSX can read it.
+          const code = Math.random().toString(36).slice(2,8).toUpperCase();
+          setSessionCode(code);
+        }
+
+        function joinSession(){
+          if(!sessionCode){ alert('Create or enter a session code first.'); return; }
+          setJoined(true);
+        }
+
+        function connectSpotify(){
+          setOauthConnected(true);
+          alert('[Spotify OAuth Placeholder]');
+        }
+
+        function submitPlaylist(){
+          if(!playlistUrl){ alert('[Submit Playlist Placeholder]'); return; }
+          setJoined(true);
+        }
+
+        function Navbar({signedIn=false, username=''}) {
+          return (
+            <nav className="navbar">
+              <div className="navbar-left">
+                <header className="site-brand">
+                  <div className="logo">EL</div>
+                  <div>
+                    <h1>EchoLogz</h1>
+                    <p className="lead">SNAPPY TAGLINE HERE</p>
+                  </div>
+                </header>
+              </div>
+              <div className="navbar-right">
+                {signedIn ? (
+                  <>
+                    <a href="#" className="nav-link">Account</a>
+                    <a href="#" className="nav-link">Saved</a>
+                    <span className="nav-user">{username}</span>
+                  </>
+                ) : (
+                  <>
+                    <a href="#" className="nav-link">Sign In</a>
+                    <a href="#" className="nav-link signup">Sign Up</a>
+                  </>
+                )}
+              </div>
+            </nav>
+          );
+        }
+
+        return (
+          <div className="app-container">
+            <Navbar signedIn={signedIn} username={username} />
+
+            <div className="app">
+              <aside className="panel">
+                <section className="create-join">
+                  <div className="session-panel">
+                    <label style={{fontWeight:600, marginBottom:6, display:'block'}}>Compare Session</label>
+                    <div className="session-active">
+                      <input 
+                        type="text"
+                        value={sessionCode}
+                        onChange={e => setSessionCode(e.target.value)}
+                        readOnly={joined} 
+                        className="session-code" 
+                        placeholder="Session code"
+                      />
+
+                      {joined ? (
+                        <button className="btn secondary small" onClick={() => { setJoined(false); setSessionCode(''); }}>
+                          Leave Session
+                        </button>
+                      ) : (
+                        <div style={{display:'flex', gap:8}}>
+                          <button className="btn small" onClick={() => {
+                            const code = Math.random().toString(36).slice(2,8).toUpperCase();
+                            setSessionCode(code);
+                            setJoined(true);
+                          }}>New</button>
+
+                          <button className="btn secondary small" onClick={() => {
+                            if(!sessionCode) { alert("Enter a session code first."); return; }
+                            setJoined(true);
+                          }}>Join</button>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="session-note">
+                      {joined ? `You are in a session. Share the code above.` : "Enter a session code or create a new session."}
+                    </div>
+                  </div>
+
+                  <hr className="divider" />
+
+                  <div className="music-panel">
+                    <div className="oauth-btn" onClick={connectSpotify}>
+                      <img src="https://storage.googleapis.com/pr-newsroom-wp/1/2023/05/Spotify_Primary_Logo_RGB_White.png" alt="Spotify" className="spotify-logo"/>
+                      Connect with Spotify
+                    </div>
+
+                    <div className="or-separator">— OR —</div>
+
+                    <div className="playlist-input">
+                      <input 
+                        type="text" 
+                        placeholder="Paste public Spotify playlist URL" 
+                        value={playlistUrl} 
+                        onChange={e=>setPlaylistUrl(e.target.value)}
+                        disabled={oauthConnected} 
+                      />
+                      <button className="btn small" onClick={submitPlaylist} disabled={oauthConnected}>Submit</button>
+                    </div>
+
+                    {oauthConnected && <div className="spotify-note">Spotify account connected. Playlist URL input disabled.</div>}
+                  </div>
+                </section>
+              </aside>
+
+              <main className="right-grid">
+                <div className="panel summary" style={{alignItems:'center'}}>
+                  <div style={{flex:1}}>
+                    <h2 style={{margin:'0 0 6px 0'}}>Your Compatibility</h2>
+                  </div>
+                  <div>
+                    <div className="score-bubble" 
+                         style={{background: `conic-gradient(var(--accent-color) 0deg, var(--accent-color) ${compatibility * 3.6}deg, #333 ${compatibility * 3.6}deg 360deg)`}}>
+                      <span>{compatibility}%</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="panel identity-grid">
+                  <div className="identity-card">
+                    <h3>{mockIdentityA.name}</h3>
+                    <div className="muted">Musical identity (aggregated features sample)</div>
+                    <div style={{height:10}} />
+                    <div className="feature-list">
+                      {mockIdentityA.features.map((f,i)=>(<div className="chip" key={i}>{f}</div>))}
+                    </div>
+                  </div>
+
+                  <div className="identity-card">
+                    <h3>{mockIdentityB.name}</h3>
+                    <div className="muted">Musical identity (aggregated features sample)</div>
+                    <div style={{height:10}} />
+                    <div className="feature-list">
+                      {mockIdentityB.features.map((f,i)=>(<div className="chip" key={i}>{f}</div>))}
+                    </div>
+                  </div>
+
+                  <div style={{gridColumn:'1 / 3'}}>
+                    <div className="heatmap">COMPATIBILITY HEATMAP</div>
+                  </div>
+                </div>
+
+                <div className="panel" style={{display:'flex',flexDirection:'column',gap:12}}>
+                  <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+                    <h3 style={{margin:0}}>Recommendations</h3>
+                  </div>
+
+                  <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:12}}>
+                    <div className="identity-card" style={{padding:10}}>
+                      <div style={{fontWeight:700}}>#1 — Example Song</div>
+                      <div className="muted" style={{fontSize:13}}>Artist • Album</div>
+                      <Placeholder label="Play / Add" />
+                    </div>
+
+                    <div className="identity-card" style={{padding:10}}>
+                      <div style={{fontWeight:700}}>#2 — Example Song</div>
+                      <div className="muted" style={{fontSize:13}}>Artist • Album</div>
+                      <Placeholder label="Play / Add" />
+                    </div>
+                    
+                    <div className="identity-card" style={{padding:10}}>
+                      <div style={{fontWeight:700}}>#3 — Example Song</div>
+                      <div className="muted" style={{fontSize:13}}>Artist • Album</div>
+                      <Placeholder label="Play / Add" />
+                    </div>
+                  </div>
+                </div>
+              </main>
+            </div>
+          </div>
+        )
+      }
+
+      const root = ReactDOM.createRoot(document.getElementById('root'));
+      root.render(<EchoLogzMockup />);
+    </script>
+  </body>
+</html>
