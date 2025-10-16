@@ -7,7 +7,7 @@ for the EchoLogz backend.
 Core Responsibilities:
 - Load environment variables from the .env file using Pydantic's BaseSettings
 - Store configuration values for database URLs, API credentials, and debug modes
-- Provide a single, reliable access point for global settings across the backend
+- Provide a single access point for global settings across the backend
 
 Purpose:
 Acts as the centralized "control panel" for the backend — keeping sensitive
