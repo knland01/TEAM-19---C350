@@ -1,0 +1,64 @@
+######################################
+# EchoLogz Front-End Requirements
+# Environment: node / npm (React v18)
+######################################
+
+# -------------------------------
+# Core Framework
+# -------------------------------
+react@18                # Main React library for UI components
+react-dom@18            # Renders React components to the DOM
+
+# -------------------------------
+# Build & Transpilation
+# -------------------------------
+vite                    # Fast modern bundler for React apps (alternative to Webpack)
+@vitejs/plugin-react     # Adds React & JSX support for Vite
+babel-core              # Transpiler for ES6+ and JSX
+babel-preset-react      # React-specific Babel preset
+
+# -------------------------------
+# Styling
+# -------------------------------
+styled-components        # CSS-in-JS styling for dynamic UI
+tailwindcss              # Utility-first CSS framework (optional)
+postcss                  # For Tailwind or advanced CSS preprocessing
+autoprefixer             # Ensures CSS works across browsers
+
+# -------------------------------
+# Fonts / Visuals
+# -------------------------------
+@fontsource/inter        # Self-hosted version of Google Inter font
+react-icons              # Optional icon set
+
+# -------------------------------
+# State Management (optional)
+# -------------------------------
+zustand                  # Lightweight state management library (optional)
+redux                    # Full-featured state management (optional)
+react-redux              # Redux bindings for React
+
+# -------------------------------
+# API / HTTP Requests
+# -------------------------------
+axios                    # For communicating with the FastAPI backend
+
+# -------------------------------
+# Testing (optional)
+# -------------------------------
+jest                     # JavaScript testing framework
+react-testing-library    # Testing React components
+
+# -------------------------------
+# Electron (optional desktop build)
+# -------------------------------
+electron                 # Converts the web app into a desktop application
+
+######################################
+# Run locally:
+#   npm install
+#   npm run dev
+#
+# Build for production:
+#   npm run build
+######################################

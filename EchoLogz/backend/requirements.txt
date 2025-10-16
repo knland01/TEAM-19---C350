@@ -1,0 +1,47 @@
+######################################
+# EchoLogz Backend Requirements
+# Environment: echologz_env
+######################################
+
+# -------------------------------
+# Core Web Framework
+# -------------------------------
+fastapi             # Main API framework
+uvicorn[standard]   # ASGI server to run FastAPI
+
+# -------------------------------
+# Database + ORM
+# -------------------------------
+sqlalchemy          # ORM for managing database models
+alembic             # Database migrations (optional but recommended)
+sqlite3             # Comes with Python, included for local dev
+psycopg2-binary     # PostgreSQL driver (for future deployment)
+
+# -------------------------------
+# Data Validation
+# -------------------------------
+pydantic            # Defines schemas and data models
+
+# -------------------------------
+# Math / Analytics
+# -------------------------------
+numpy               # Vector operations, array math
+scikit-learn        # Similarity scores (cosine, clustering, etc.)
+
+# -------------------------------
+# Caching / Session Storage (Optional)
+# -------------------------------
+redis               # Only needed if caching sessions or tokens
+
+# -------------------------------
+# Auth / API Integration
+# -------------------------------
+authlib             # OAuth2 for Spotify or external APIs
+requests            # General HTTP requests to APIs
+
+# -------------------------------
+# Development Tools
+# -------------------------------
+python-dotenv       # Load environment variables from .env
+
+
