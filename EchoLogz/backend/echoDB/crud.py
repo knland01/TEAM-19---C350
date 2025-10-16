@@ -19,4 +19,6 @@ Typical Usage Example (from another module):
     db_user = crud.get_user_by_id(db, user_id=1)
 """
 
+from sqlalchemy.orm import Session
 from . import models, schemas, database
+from fastapi import HTTPException, status
