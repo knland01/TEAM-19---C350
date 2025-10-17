@@ -1,0 +1,10 @@
+#ignore environment files
+EchoLogz/backend/.env
+
+#Ignore common system clutter
+.DS_Store
+Thumbs.db
+
+#Ignore IDE config folders
+.vscode/
+.idea/
