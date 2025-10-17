@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Account - EchoLogz</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="pw-style.css" />
+    <!-- React, ReactDOM, Babel -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  </head>
+  <body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+      const { useState, useEffect, useRef } = React;
+
+      /* ---------- Navbar ---------- */
+      function Navbar({ active = "Account" }) {
+        return (
+          <nav className="navbar">
+            <div className="navbar-left">
+              <header className="site-brand">
+                <div className="logo">EL</div>
+                <div>
+                  <h1>EchoLogz</h1>
+                  <p className="lead">Your Music. Your Match.</p>
+                </div>
+              </header>
+            </div>
+            <div className="navbar-right">
+              <a href="index.html" className={`nav-link ${active==="Dashboard"?"active":""}`}>Dashboard</a>
+              <a href="history_mockup.html" className="nav-link">Saved</a>
+              <a href="account.html" className={`nav-link ${active==="Account"?"active":""}`}>Account</a>
+              <a href="sign_in.html" className="nav-link signup">Sign Out</a>
+            </div>
+          </nav>
+        );
+      }
+
+      /* ---------- UI Feedback (toast) ---------- */
+      function Toast() {
+        const [msg, setMsg] = useState("");
+        const timerRef = useRef(null);
+        useEffect(() => {
+          window.UIFeedback = {
+            show: (m, ms = 1800) => {
+              setMsg(m);
+              if (timerRef.current) clearTimeout(timerRef.current);
+              timerRef.current = setTimeout(() => setMsg(""), ms);
+            },
+          };
+          return () => { window.UIFeedback = undefined; };
+        }, []);
+        return <div id="toast" className={"toast" + (msg ? " show" : "")}>{msg}</div>;
+      }
+
+      /* ---------- Account Components ---------- */
+      function AvatarUploader({ currentUrl }) {
+        const [file, setFile] = useState(null);
+        const upload = () => {
+          if (!file) return;
+          // TODO: POST /me/avatar
+          UIFeedback.show("Avatar updated");
+          setFile(null);
+        };
+        return (
+          <div className="card panel">
+            <h2>Avatar</h2>
+            <div className="row">
+              <img src={currentUrl || "https://via.placeholder.com/64"} width="64" height="64" style={{borderRadius:8}}/>
+              <input className="file input" type="file" accept="image/*" onChange={e=>setFile(e.target.files?.[0] || null)} />
+              <button className="btn secondary" onClick={upload} disabled={!file}>Upload</button>
+            </div>
+          </div>
+        );
+      }
+
+      function ProfileForm({ initial }) {
+        const [name, setName] = useState(initial?.name || "");
+        const [email, setEmail] = useState(initial?.email || "");
+        const onSubmit = (e) => {
+          e.preventDefault();
+          // TODO: PATCH /me
+          UIFeedback.show("Profile updated");
+        };
+        return (
+          <div className="card panel">
+            <h2>Profile</h2>
+            <form onSubmit={onSubmit}>
+              <div className="row">
+                <input className="input" placeholder="Name" value={name} onChange={e=>setName(e.target.value)} />
+              </div>
+              <div className="row">
+                <input className="input" placeholder="Email" value={email} onChange={e=>setEmail(e.target.value)} />
+              </div>
+              <button className="btn" type="submit">Save</button>
+            </form>
+          </div>
+        );
+      }
+
+      function PasswordForm() {
+        const [current, setCurrent] = useState("");
+        const [next, setNext] = useState("");
+        const change = (e) => {
+          e.preventDefault();
+          if (!next) return UIFeedback.show("Enter a new password");
+          // TODO: POST /me/password
+          setCurrent(""); setNext("");
+          UIFeedback.show("Password changed");
+        };
+        return (
+          <div className="card panel">
+            <h2>Change Password</h2>
+            <form onSubmit={change}>
+              <div className="row"><input className="input" type="password" placeholder="Current password" value={current} onChange={e=>setCurrent(e.target.value)} /></div>
+              <div className="row"><input className="input" type="password" placeholder="New password" value={next} onChange={e=>setNext(e.target.value)} /></div>
+              <button className="btn" type="submit">Update</button>
+            </form>
+          </div>
+        );
+      }
+
+      function ThemeToggle({ value="system" }) {
+        const [theme, setTheme] = useState(value);
+        const save = () => {
+          // TODO: PATCH /me/prefs { theme }
+          document.documentElement.dataset.theme = theme;
+          UIFeedback.show("Theme saved");
+        };
+        return (
+          <div className="card panel">
+            <h2>Theme</h2>
+            <select className="select input" value={theme} onChange={e=>setTheme(e.target.value)}>
+              <option value="system">System</option>
+              <option value="light">Light</option>
+              <option value="dark">Dark</option>
+            </select>
+            <div style={{marginTop:8}}><button className="btn" onClick={save}>Save</button></div>
+          </div>
+        );
+      }
+
+      function NotificationToggles({ prefs }) {
+        const [state, setState] = useState(prefs || { emailMarketing:false, emailSecurity:true, pushGeneral:true });
+        const toggle = (k) => setState(s => ({...s, [k]: !s[k]}));
+        const save = () => {
+          // TODO: PATCH /me/prefs { notifications }
+          UIFeedback.show("Preferences saved");
+        };
+        return (
+          <div className="card panel">
+            <h2>Notifications</h2>
+            <div className="row"><label><input type="checkbox" checked={state.emailMarketing} onChange={()=>toggle("emailMarketing")} /> Marketing emails</label></div>
+            <div className="row"><label><input type="checkbox" checked={state.emailSecurity} onChange={()=>toggle("emailSecurity")} /> Security emails</label></div>
+            <div className="row"><label><input type="checkbox" checked={state.pushGeneral} onChange={()=>toggle("pushGeneral")} /> General push</label></div>
+            <button className="btn" onClick={save}>Save</button>
+          </div>
+        );
+      }
+
+      function ConnectedAccounts({ accounts = [] }) {
+        const providers = ["spotify","google","github"];
+        const isLinked = (p) => accounts.some(a => a.provider === p);
+        const link = (p) => { /* TODO: POST /me/accounts/:p */ UIFeedback.show(`Linked ${p}`); };
+        const unlink = (p) => { /* TODO: DELETE /me/accounts/:p */ UIFeedback.show(`Unlinked ${p}`); };
+        return (
+          <div className="card panel">
+            <h2>Connected Accounts</h2>
+            {providers.map(p => (
+              <div key={p} className="row" style={{justifyContent:"space-between"}}>
+                <div style={{textTransform:"capitalize"}}>{p}</div>
+                {isLinked(p)
+                  ? <button className="btn secondary" onClick={()=>unlink(p)}>Unlink</button>
+                  : <button className="btn" onClick={()=>link(p)}>Link</button>}
+              </div>
+            ))}
+          </div>
+        );
+      }
+
+      /* ---------- Account Page (tabs) ---------- */
+      function AccountPage() {
+        // stubbed user; swap out once backend is wired
+        const me = {
+          name: "Karis",
+          email: "karis@example.com",
+          avatarUrl: "",
+          settings: {
+            theme: "system",
+            notifications: { emailMarketing:false, emailSecurity:true, pushGeneral:true },
+            connectedAccounts: [{ provider: "spotify", linkedAt: "2025-06-01" }],
+          },
+        };
+
+        const [tab, setTab] = useState("profile"); // 'profile' | 'password' | 'prefs' | 'connections'
+
+        const TabLink = ({id, children}) => (
+          <button className={`tab ${tab===id ? "active":""}`} onClick={()=>setTab(id)}>{children}</button>
+        );
+
+        return (
+          <div className="app-container">
+            <Navbar active="Account" />
+            <div className="container">
+              <div className="tabs" style={{marginTop:12}}>
+                <TabLink id="profile">Profile</TabLink>
+                <TabLink id="password">Password</TabLink>
+                <TabLink id="prefs">Preferences</TabLink>
+                <TabLink id="connections">Connected Accounts</TabLink>
+              </div>
+            </div>
+
+            <div className="app" style={{ gridTemplateColumns: "1fr" }}>
+              <main className="right-grid">
+                {tab === "profile" && (
+                  <>
+                    <AvatarUploader currentUrl={me.avatarUrl} />
+                    <ProfileForm initial={me} />
+                  </>
+                )}
+                {tab === "password" && <PasswordForm />}
+                {tab === "prefs" && (
+                  <>
+                    <ThemeToggle value={me.settings.theme} />
+                    <NotificationToggles prefs={me.settings.notifications} />
+                  </>
+                )}
+                {tab === "connections" && (
+                  <ConnectedAccounts accounts={me.settings.connectedAccounts} />
+                )}
+              </main>
+            </div>
+
+            <Toast />
+          </div>
+        );
+      }
+
+      ReactDOM.createRoot(document.getElementById("root")).render(<AccountPage />);
+    </script>
+  </body>
+</html>
