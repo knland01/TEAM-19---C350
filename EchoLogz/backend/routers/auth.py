@@ -1,62 +1,92 @@
 """
-Authentication Router (Spotify Gatekeeper)
+EchoLogz Auth Router
 
-This module defines all authentication-related API endpoints for the EchoLogz backend.
-It manages user login, token verification, and integration with external OAuth provider: SPOTIFY - for secure access and authorization.
-
-Core Responsibilities:
-- Handle user login and logout routes
-- Manage OAuth flows (Spotify authorization, callback, and token exchange)
-- Issue and verify access tokens (JWT or session-based)
-- Securely store and refresh tokens for authenticated users
-- Enforce route protection for endpoints requiring authentication
-
-Purpose:
-Acts as the gatekeeper for the EchoLogz backend — responsible for verifying user identity, managing sessions, and enabling secure data access through token-based authentication.
-
-Typical Usage Example:
-    from fastapi import FastAPI
-    from backend.routers import auth
-
-    app = FastAPI()
-    app.include_router(auth.router)
+- /auth/signup
+- /auth/login
+- /auth/me (protected)
+Uses JWT for stateless auth.
 """
-# AUTH SKELETON:
-from fastapi import APIRouter, Depends, HTTPException
-import requests, os
+
+from datetime import datetime, timedelta
+from fastapi import APIRouter, HTTPException, Depends, status
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from passlib.context import CryptContext
+from jose import jwt, JWTError
+from pydantic import BaseModel
+import os
+
+
+# -------------------------------------------------------------------
+# AUTH.PY DEMO... 
+# -------------------------------------------------------------------
+# Minimal in-memory demo store — replace with real DB via echoDB.crud
+_FAKE_USERS = {}  # {username: {"username":..., "hashed_password":...}}
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
-SPOTIFY_CLIENT_ID = os.getenv("SPOTIFY_CLIENT_ID")
-SPOTIFY_CLIENT_SECRET = os.getenv("SPOTIFY_CLIENT_SECRET")
-REDIRECT_URI = os.getenv("SPOTIFY_REDIRECT_URI")
+SECRET_KEY = os.getenv("JWT_SECRET", "dev-secret-change-me")
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
-@router.get("/login")
-def login_spotify():
-    scopes = "user-read-email playlist-read-private"
-    url = (
-        "https://accounts.spotify.com/authorize"
-        f"?client_id={SPOTIFY_CLIENT_ID}"
-        f"&response_type=code&redirect_uri={REDIRECT_URI}"
-        f"&scope={scopes}"
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+
+class User(BaseModel):
+    username: str
+
+class UserCreate(BaseModel):
+    username: str
+    password: str
+
+def verify_password(plain, hashed):
+    return pwd_context.verify(plain, hashed)
+
+def hash_password(plain):
+    return pwd_context.hash(plain)
+
+def create_access_token(data: dict, expires_delta: timedelta | None = None):
+    to_encode = data.copy()
+    expire = datetime.utcnow() + (expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
+    to_encode.update({"exp": expire})
+    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+
+def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
+    credentials_error = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
     )
-    return {"auth_url": url}
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str | None = payload.get("sub")
+        if username is None or username not in _FAKE_USERS:
+            raise credentials_error
+    except JWTError:
+        raise credentials_error
+    return User(username=username)
 
-@router.get("/callback")
-def spotify_callback(code: str):
-    token_url = "https://accounts.spotify.com/api/token"
-    payload = {
-        "grant_type": "authorization_code",
-        "code": code,
-        "redirect_uri": REDIRECT_URI,
-        "client_id": SPOTIFY_CLIENT_ID,
-        "client_secret": SPOTIFY_CLIENT_SECRET,
+@router.post("/signup", status_code=201)
+def signup(user: UserCreate):
+    if user.username in _FAKE_USERS:
+        raise HTTPException(status_code=400, detail="Username already exists")
+    _FAKE_USERS[user.username] = {
+        "username": user.username,
+        "hashed_password": hash_password(user.password),
     }
-    resp = requests.post(token_url, data=payload)
-    tokens = resp.json()
+    return {"message": "User created"}
 
-    if "access_token" not in tokens:
-        raise HTTPException(status_code=400, detail="Failed to get token")
+@router.post("/login", response_model=Token)
+def login(form: OAuth2PasswordRequestForm = Depends()):
+    record = _FAKE_USERS.get(form.username)
+    if not record or not verify_password(form.password, record["hashed_password"]):
+        raise HTTPException(status_code=400, detail="Incorrect username or password")
+    token = create_access_token({"sub": form.username})
+    return {"access_token": token, "token_type": "bearer"}
 
-    # Save tokens to DB for the user here
-    return {"message": "Spotify connected", "tokens": tokens}
+@router.get("/me", response_model=User)
+def read_me(current_user: User = Depends(get_current_user)):
+    return current_user

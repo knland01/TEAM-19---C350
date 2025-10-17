@@ -10,9 +10,9 @@ Responsibilities:
 - Keeps the main API routes clean and focused on HTTP logic.
 
 Files Connected:
-- models.py     → Defines database tables and relationships.
-- schemas.py    → Defines Pydantic models for request/response validation.
-- database.py   → Provides the database session (SessionLocal) for queries.
+- db_schemas.py     → Defines database tables and relationships.
+- db_validation.py    → Defines Pydantic models for request/response validation.
+- db_session.py   → Provides the database session (SessionLocal) for queries.
 
 Typical Usage Example (from another module):
     from . import crud, models, database
@@ -20,5 +20,6 @@ Typical Usage Example (from another module):
 """
 
 from sqlalchemy.orm import Session
-from . import models, schemas, database
+from EchoLogz.backend.echoDB import db_schemas, db_validation
+from EchoLogz.backend.echoDB import db_session
 from fastapi import HTTPException, status

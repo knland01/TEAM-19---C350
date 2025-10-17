@@ -18,10 +18,10 @@ flowchart LR
   end
 
   subgraph Data Layer
-    DBMOD["echoDB/database.py (engine, SessionLocal, Base, get_db)"]
-    MODELS["echoDB/models.py (ORM classes)"]
-    SCHEMAS["echoDB/schemas.py (Pydantic models)"]
-    CRUD["echoDB/crud.py (DB operations)"]
+    DBMOD["echoDB/db_session.py (engine, SessionLocal, Base, get_db)"]
+    MODELS["echoDB/db_schemas.py (ORM classes)"]
+    SCHEMAS["echoDB/db_validation.py (Pydantic models)"]
+    CRUD["echoDB/db_crud.py (DB operations)"]
     FILEDB[(echoLogz.db SQLite file)]
   end
 
@@ -66,8 +66,8 @@ sequenceDiagram
   participant Router as Endpoint (routers/*.py)
   participant Deps as get_db() / deps
   participant CRUD as CRUD funcs
-  participant DB as Session/Engine (echoDB/database.py)
-  participant Models as ORM Models (models.py)
+  participant DB as Session/Engine (echoDB/db_session.py)
+  participant Models as ORM Models (db_schemas.py)
   participant Schemas as Pydantic Schemas
 
   Client->>App: HTTP request /api/users

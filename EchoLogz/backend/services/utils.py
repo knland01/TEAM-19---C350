@@ -28,7 +28,7 @@ import os                      # File paths, environment variables
 import json                    # JSON formatting and serialization
 import math                    # Basic math operations (ex: rounding, normalization)
 import logging                 # Consistent logging for debugging
-from datetime import datetime  # Timestamps, log markers
+from datetime import datetime, timezone  # Timestamps, log markers
 
 # Third-Party Libraries (commonly used with EchoLogz stack)
 import numpy as np             # Vector operations (used by compatibility calculations)
@@ -44,7 +44,7 @@ def normalize_vector(vector):
 
 def timestamp_now():
     """Return current UTC timestamp as an ISO-formatted string."""
-    return datetime.utcnow().isoformat()
+    return datetime.now(timezone.utc).isoformat()
 
 
 def json_pretty(data):

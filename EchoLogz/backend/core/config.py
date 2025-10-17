@@ -13,10 +13,28 @@ Purpose:
 Acts as the centralized "control panel" for the backend — keeping sensitive
 information (like keys and connection strings) organized and out of code.
 
-Typical Usage Example:
+Typical Usage Example (access from anywhere):
     from backend.core.config import settings
 
     print(settings.app_name)
     print(settings.database_url)
 
 """
+
+from pydantic import BaseSettings
+from dotenv import load_dotenv
+
+# Load the .env file first
+load_dotenv()
+
+class Settings(BaseSettings):
+    database_url: str
+    spotify_client_id: str
+    spotify_client_secret: str
+    spotify_redirect_uri: str
+    jwt_secret: str
+
+    class Config:
+        env_file = ".env"  # Optional redundancy, Pydantic can use this too
+
+settings = Settings()

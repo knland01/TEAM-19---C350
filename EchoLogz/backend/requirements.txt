@@ -38,10 +38,16 @@ redis               # Only needed if caching sessions or tokens
 # -------------------------------
 authlib             # OAuth2 for Spotify or external APIs
 requests            # General HTTP requests to APIs
+python-jose[cryptography] # JWT encoding/decoding for login tokens
+passlib[bcrypt]     # Password hashing and verification
 
 # -------------------------------
 # Development Tools
 # -------------------------------
 python-dotenv       # Load environment variables from .env
+
+
+
+
 
 
