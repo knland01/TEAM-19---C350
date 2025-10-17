@@ -20,9 +20,8 @@ Typical Usage Example (from another module):
 """
 
 from sqlalchemy.orm import Session
-from echoDB import db_schemas, db_validation as val
+from . import db_schemas, db_validation as val, db_session
 from .db_schemas import User
-from echoDB import db_session
 from fastapi import HTTPException, status
 
 def create_user_with_hash(

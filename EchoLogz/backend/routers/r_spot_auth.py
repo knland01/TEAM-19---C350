@@ -15,14 +15,16 @@ Secure storage notes
 
 # AUTH SKELETON:
 from fastapi import APIRouter, HTTPException
+from fastapi.responses import RedirectResponse
 import os, base64, requests
 from urllib.parse import urlencode
+from core.config import settings
 
 router = APIRouter(prefix="/auth/spotify", tags=["spotify-auth"])
 
-SPOTIFY_CLIENT_ID = os.getenv("SPOTIFY_CLIENT_ID")
-SPOTIFY_CLIENT_SECRET = os.getenv("SPOTIFY_CLIENT_SECRET")
-SPOTIFY_REDIRECT_URI = os.getenv("SPOTIFY_REDIRECT_URI")  # e.g. http://localhost:8000/auth/spotify/callback
+SPOTIFY_CLIENT_ID = settings.SPOTIFY_CLIENT_ID
+SPOTIFY_CLIENT_SECRET = settings.SPOTIFY_CLIENT_SECRET
+SPOTIFY_REDIRECT_URI = settings.SPOTIFY_REDIRECT_URI  # e.g. http://localhost:8000/auth/spotify/callback
 SCOPES = "user-read-email playlist-read-private"
 
 def _basic_auth_header(client_id: str, client_secret: str) -> dict:
@@ -40,7 +42,7 @@ def login_spotify():
         # "show_dialog": "true",
     }
     url = "https://accounts.spotify.com/authorize?" + urlencode(params)
-    return {"auth_url": url}
+    return RedirectResponse(url)
 
 @router.get("/callback")
 def spotify_callback(code: str):
@@ -49,6 +51,8 @@ def spotify_callback(code: str):
         "grant_type": "authorization_code",
         "code": code,
         "redirect_uri": SPOTIFY_REDIRECT_URI,
+        "client_id": SPOTIFY_CLIENT_ID,
+        "client_secret": SPOTIFY_CLIENT_SECRET,
     }
     headers = _basic_auth_header(SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET)
     resp = requests.post(token_url, data=data, headers=headers)
