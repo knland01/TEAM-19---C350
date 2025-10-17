@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Sign in - EchoLogz</title>
+
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="pw-style.css"/>
+
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+
+    <!-- Don't use this in production: -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="text/babel">
+      const {useState} = React;
+
+      function ErrorPage() {
+
+        function validateEmail(email) {
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          return emailRegex.test(email);
+        }
+
+        function Navbar() {
+          return (
+            <nav className="navbar">
+              <div className="navbar-left">
+                <header className="site-brand">
+                  <div className="logo">EL</div>
+                  <div>
+                    <h1>EchoLogz</h1>
+                    <p className="lead">SNAPPY TAGLINE HERE</p>
+                  </div>
+                </header>
+              </div>
+              <div className="navbar-right">
+                <a href="sign_in.html" className="nav-link">Sign In</a>
+                <a href="sign_up.html" className="nav-link signup">Sign Up</a>
+              </div>
+            </nav>
+          );
+        }
+
+        function BackButton() {
+
+            function goBack() {
+                window.history.back();
+            }
+            return (
+            <button className="back-button" onClick={goBack}>
+            Go Back
+            </button>
+            );
+        }
+
+        function ErrorPageContents() {
+          return (
+            <div className="reset-form">
+              <h2>Error ___</h2>
+
+              <p>Sorry :(</p>
+                <p>Error Message</p>
+                <BackButton />
+            </div>
+          );
+        }
+
+
+        return (
+          <div className="app-container">
+            <Navbar />
+            <div className="reset-container">
+              <div className="reset-panel panel">
+                <ErrorPageContents />
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      const root = ReactDOM.createRoot(document.getElementById('root'));
+      root.render(<ErrorPage />);
+    </script>
+  </body>
+</html>
