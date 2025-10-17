@@ -13,29 +13,49 @@ Files Connected:
 - db_schemas.py     → Defines SQLAlchemy models (database structure)
 - db_session.py   → Sets up database engine, session, and Base class
 
-Run with:
-    uvicorn main:app --reload
+Run with Terminal Command:
+            uvicorn main:app --reload
 
-Access the running server at:
-    http://127.0.0.1:8000/ (or) http://localhost:8000/
+Access the running server at: 
+            http://127.0.0.1:8000/
+
 """
 
 
 from fastapi import FastAPI
-from EchoLogz.backend.echoDB import db_schemas
-from backend.core.config import settings # Load (.env) variables via config.py
-from EchoLogz.backend.echoDB import db_session # SQLAlchemy Base/engine
-from backend.routers import auth, spotify_auth, health, users
+from fastapi.middleware.cors import CORSMiddleware 
+# ... CORS: Allows communication btwn diff ports (frontend -> backend) - which is only issue during dev
+# ... FRONT-END (DEV): 127.0.0.1:5500 --> BACK-END (DEV): 127.0.0.1:8000
+# ... FRONT-END (DEPLOY): https://echologz(or whatever).com --> BACK-END (DEPLOY): https://echologz(or whatever)/api.com
+from EchoLogz.backend.routers import r_auth, r_spot_auth, r_status, r_match
+from echoDB import db_schemas, db_session
+from core.config import settings # Load (.env) variables via config.py
+from EchoLogz.backend.routers import r_users
 from contextlib import asynccontextmanager
 
 # Create the FastAPI app instance
 app = FastAPI(title="EchoLogz API")
 
+# CORS CONFIG:
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[ # ALLOW FRONT-END ---> HTTP REQUESTS ---> BACK-END: 127.0.0.1:8000
+        "http://127.0.0.1:5500", "http://localhost:5500",
+        "http://127.0.0.1:3000", "http://localhost:3000",
+        "https://echoquest.app"  # your production frontend
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],  # or ["GET", "POST"] if you want to limit
+    allow_headers=["*"],  # or ["Authorization", "Content-Type"]
+)
+
+
 # Routers
-app.include_router(auth.router)
-app.include_router(spotify_auth.router)
-app.include_router(health.router)
-app.include_router(users.router)
+app.include_router(r_auth.router)
+app.include_router(r_spot_auth.router)
+app.include_router(r_status.router)
+app.include_router(r_users.router)
+app.include_router(r_match.router)
 
 # Ensure tables exist when the app starts
 # @app.on_event("startup") # deprecated ---> lifespan syntax (see below)

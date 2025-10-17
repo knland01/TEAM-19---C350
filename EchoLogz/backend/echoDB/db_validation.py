@@ -16,20 +16,27 @@ Files Connected:
 - db_crud.py   → Uses schemas to validate input/output during DB operations.
 - main.py   → References schemas for API request and response models.
 
-Typical Entry Examples:
-
-    class UserBase(BaseModel):
-        name: str
-        email: str
-
-    class UserCreate(UserBase):
-        password: str
-
-    class UserResponse(UserBase):
-        id: int
-        class Config:
-            orm_mode = True  # Enables reading SQLAlchemy objects directly
-
 """
 
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr, ConfigDict
+
+# ---------- Inputs ----------
+class UserBase(BaseModel):
+    name: str
+    email: EmailStr
+
+class UserCreate(BaseModel):
+    username: str
+    password: str
+    email: EmailStr | None = None
+
+# ---------- Outputs ----------
+class UserOut(BaseModel):
+    id: int
+    username: str
+    email: EmailStr | None = None
+    model_config = ConfigDict(from_attributes=True)
+
+class TokenOut(BaseModel):
+    access_token: str
+    token_type: str = "bearer"

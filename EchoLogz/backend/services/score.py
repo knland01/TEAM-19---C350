@@ -15,7 +15,7 @@ Acts as the brain of the EchoLogz backend—responsible for interpreting data
 and generating the 'connection scores' that drive recommendations.
 
 Typical Usage Example:
-    from services.compatibility import calculate_compatibility
+    from services.scores import calculate_compatibility
 
     score = calculate_compatibility(user1_vector, user2_vector)
     print(f"User Compatibility: {score:.2f}")
@@ -25,6 +25,10 @@ from typing import List, Dict        # For clean function type hints
 from sklearn.metrics.pairwise import cosine_similarity  # Optional: built-in cosine sim
 from .. import crud, models          # To fetch data from the database if needed
 
-def calculate_compatibility():
+def _score():
     #some logic
     return #score
+
+def compare_users():
+    return
+
