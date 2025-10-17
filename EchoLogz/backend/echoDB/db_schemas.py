@@ -20,6 +20,11 @@ Example of use (inside db_crud.py):
     def get_user_by_id(db, user_id: int):
         return db.query(models.User).filter(models.User.id == user_id).first()
 
+
+        
+NOTE: Spotify Developer Terms = “Except as otherwise set out in these Developer Terms, you may not store, aggregate or create compilations or databases of Spotify Content, other than as strictly necessary to operate your SDA.”
+WORK AROUND: Store Track IDs + URIs (this is ok)
+        
 """
 
 
