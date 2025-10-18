@@ -40,3 +40,8 @@ class UserOut(BaseModel):
 class TokenOut(BaseModel):
     access_token: str
     token_type: str = "bearer"
+
+class UserUpdate(BaseModel):
+    username: str | None = None
+    password: str | None = None
+    email: EmailStr | None = None

@@ -44,7 +44,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, Field
 from core.dependencies import get_db
-from EchoLogz.backend.services.score import compare_users
+from services.score import compare_users
 
 
 router = APIRouter(prefix="/match", tags=["match"])
