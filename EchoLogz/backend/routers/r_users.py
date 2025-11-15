@@ -36,13 +36,13 @@ from sqlalchemy.orm import Session
 
 router = APIRouter(prefix="/users", tags=["users"])
 
-@router.post("/", response_model=val.UserRead,
+@router.post("/", response_model=val.UserOut,
              status_code=status.HTTP_201_CREATED)
 def create_user_endpoint(payload: val.UserCreate, db: Session = Depends(get_db)):
     """Create a new user and return the created record."""
     return crud.create_user(db, payload)
 
-@router.get("/{user_id}", response_model=val.UserRead)
+@router.get("/{user_id}", response_model=val.UserOut)
 def get_user_endpoint(user_id: int, db: Session = Depends(get_db)):
     """Return a single user by id, or 404 if not found."""
     user = crud.get_user_by_id(db, user_id)
@@ -50,11 +50,11 @@ def get_user_endpoint(user_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
     return user
 
-@router.get("/", response_model=list[val.UserRead])
+@router.get("/", response_model=list[val.UserOut])
 def list_users_endpoint(db: Session = Depends(get_db)):
     return crud.list_users(db)
 
-@router.put("/{user_id}", response_model=val.UserRead)
+@router.put("/{user_id}", response_model=val.UserOut)
 def update_user_endpoint(
     user_id: int, 
     payload: val.UserUpdate,
