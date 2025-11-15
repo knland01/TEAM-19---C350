@@ -27,10 +27,10 @@ from fastapi.middleware.cors import CORSMiddleware
 # ... CORS: Allows communication btwn diff ports (frontend -> backend) - which is only issue during dev
 # ... FRONT-END (DEV): 127.0.0.1:5500 --> BACK-END (DEV): 127.0.0.1:8000
 # ... FRONT-END (DEPLOY): https://echologz(or whatever).com --> BACK-END (DEPLOY): https://echologz(or whatever)/api.com
-from EchoLogz.backend.routers import r_auth, r_spot_auth, r_status, r_match
-from echoDB import db_schemas, db_session
-from core.config import settings # Load (.env) variables via config.py
-from EchoLogz.backend.routers import r_users
+from backend.routers import r_auth, r_spot_auth, r_status, r_match
+from backend.echoDB import db_schemas, db_session
+from backend.core.config import settings # Load (.env) variables via config.py
+from backend.routers import r_users
 from contextlib import asynccontextmanager
 
 # Create the FastAPI app instance
@@ -76,3 +76,4 @@ app = FastAPI(title="EchoLogz API", lifespan=lifespan)
 @app.get("/")
 def read_root():
     return {"message": "EchoLogz backend is running!"}
+    

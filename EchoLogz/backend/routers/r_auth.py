@@ -7,6 +7,12 @@ EchoLogz Auth Router (DB-backed)
 Uses JWT for stateless auth. I/O models live in echoDB.db_validation.
 """
 
+
+
+from backend.core.dependencies import get_db
+from backend.echoDB.db_validation import UserCreate, UserOut, TokenOut
+from backend.echoDB import db_crud
+
 from datetime import datetime, timedelta, timezone
 import os
 
@@ -17,9 +23,7 @@ from jose import jwt, JWTError
 from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 
-from core.dependencies import get_db
-from echoDB.db_validation import UserCreate, UserOut, TokenOut
-from echoDB import db_crud
+
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 

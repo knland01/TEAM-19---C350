@@ -22,14 +22,17 @@ Outcome:
 """
 
 
+
+# from echoDB.db_session import get_db <--- removed
+from backend.core.dependencies import get_db
+from backend.echoDB import db_crud as crud
+from backend.echoDB import db_validation as val
+
 # EXAMPLE:
 from fastapi import APIRouter, Depends, HTTPException, status, Response
 from sqlalchemy.orm import Session
 
-# from echoDB.db_session import get_db <--- removed
-from core.dependencies import get_db
-from echoDB import db_crud as crud
-from echoDB import db_validation as val
+
 
 router = APIRouter(prefix="/users", tags=["users"])
 

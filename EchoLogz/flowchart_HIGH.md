@@ -38,7 +38,7 @@ flowchart LR
     %% ----- DB Layer -----
     subgraph DBLayer["EchoDB – Data Layer"]
       direction LR
-      AUTH["r_auth.py<br/>(EchoLogz JWT Auth)"]:::routers
+      %%AUTH["r_auth.py<br/>(EchoLogz JWT Auth)"]:::routers
       VAL["db_validation.py<br/>(Pydantic I/O)"]:::db
       CRUD["db_crud.py<br/>(DB operations)"]:::db
       SCHEMAS["db_schemas.py<br/>(SQLAlchemy ORM)"]:::db
@@ -55,7 +55,7 @@ flowchart LR
       SPOTAUTH["r_spot_auth.py<br/>(Spotify OAuth2)"]:::routers
       MATCH["r_match.py<br/>(calls score.py)"]:::routers
       USERS["r_users.py<br/>(CRUD)"]:::routers
-      %%AUTH["r_auth.py<br/>(EchoLogz JWT Auth)"]:::routers
+      AUTH["r_auth.py<br/>(EchoLogz JWT Auth)"]:::routers
       STATUS["r_status.py<br/>(Status)"]:::routers
     end
 
