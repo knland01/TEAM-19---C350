@@ -20,17 +20,21 @@ Access the running server at:
             http://127.0.0.1:8000/
 
 """
+import sys, os
 
+from starlette.staticfiles import StaticFiles
+
+sys.path.insert(0, os.path.abspath(os.path.dirname(__file__) + "/../.."))
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware 
 # ... CORS: Allows communication btwn diff ports (frontend -> backend) - which is only issue during dev
 # ... FRONT-END (DEV): 127.0.0.1:5500 --> BACK-END (DEV): 127.0.0.1:8000
 # ... FRONT-END (DEPLOY): https://echologz(or whatever).com --> BACK-END (DEPLOY): https://echologz(or whatever)/api.com
-from EchoLogz.backend.routers import r_auth, r_spot_auth, r_status, r_match
+from routers import r_auth, r_spot_auth, r_status, r_match
 from echoDB import db_schemas, db_session
 from core.config import settings # Load (.env) variables via config.py
-from EchoLogz.backend.routers import r_users
+from routers import r_users
 from contextlib import asynccontextmanager
 
 # Create the FastAPI app instance
@@ -49,14 +53,6 @@ app.add_middleware(
     allow_headers=["*"],  # or ["Authorization", "Content-Type"]
 )
 
-
-# Routers
-app.include_router(r_auth.router)
-app.include_router(r_spot_auth.router)
-app.include_router(r_status.router)
-app.include_router(r_users.router)
-app.include_router(r_match.router)
-
 # Ensure tables exist when the app starts
 # @app.on_event("startup") # deprecated ---> lifespan syntax (see below)
 # def on_startup():
@@ -70,7 +66,14 @@ async def lifespan(app: FastAPI):
     # Runs when the app stops (if you need cleanup)
 
 app = FastAPI(title="EchoLogz API", lifespan=lifespan)
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
+# Routers
+app.include_router(r_auth.router)
+app.include_router(r_spot_auth.router)
+# app.include_router(r_status.router)
+app.include_router(r_users.router)
+app.include_router(r_match.router)
 
 # Define a test route
 @app.get("/")
