@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Sign in - EchoLogz</title>
+
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="pw-style.css"/>
+
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+
+    <!-- Don't use this in production: -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="text/babel">
+      const {useState} = React;
+
+      function SignInPage() {
+        const [email, setEmail] = useState('');
+        const [password, setPassword] = useState('');
+        const [loading, setLoading] = useState(false);
+        const [errors, setErrors] = useState({});
+
+        function validateEmail(email) {
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          return emailRegex.test(email);
+        }
+
+        function handleSignIn() {
+          setErrors({});
+          const newErrors = {};
+
+          if (!email) newErrors.email = 'Email is required';
+          else if (!validateEmail(email)) newErrors.email = 'Please enter a valid email address';
+
+          if (!password) newErrors.password = 'Password is required';
+
+          if (Object.keys(newErrors).length > 0) {
+            setErrors(newErrors);
+            return;
+          }
+
+          setLoading(true);
+          // Simulate API call
+          setTimeout(() => {
+            setLoading(false);
+            window.location.href = 'index.html';
+          }, 1200);
+        }
+
+        function Navbar() {
+          return (
+            <nav className="navbar">
+              <div className="navbar-left">
+                <header className="site-brand">
+                  <div className="logo">EL</div>
+                  <div>
+                    <h1>EchoLogz</h1>
+                    <p className="lead">SNAPPY TAGLINE HERE</p>
+                  </div>
+                </header>
+              </div>
+              <div className="navbar-right">
+                <a href="sign_in.html" className="nav-link">Sign In</a>
+                <a href="sign_up.html" className="nav-link signup">Sign Up</a>
+              </div>
+            </nav>
+          );
+        }
+
+        function SignInForm() {
+          return (
+            <div className="reset-form">
+              <h2>Sign In to Your Account</h2>
+
+              <div className="form-group">
+                <label htmlFor="email">Email Address</label>
+                <input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  placeholder="Enter your email address"
+                  className={errors.email ? 'error' : ''}
+                />
+                {errors.email && <div className="error-message">{errors.email}</div>}
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="password">Password</label>
+                <input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  placeholder="Enter your password"
+                  className={errors.password ? 'error' : ''}
+                />
+                {errors.password && <div className="error-message">{errors.password}</div>}
+              </div>
+
+              <button
+                className="btn primary full-width"
+                onClick={handleSignIn}
+                disabled={loading}
+              >
+                {loading ? 'Signing In...' : 'Sign In'}
+              </button>
+
+              <div style={{marginTop: '16px', textAlign: 'center'}}>
+                <a href="password-reset.html" className="muted small">Forgot your password?</a>
+              </div>
+
+              <div style={{marginTop: '8px', textAlign: 'center'}}>
+                <a href="sign_up.html" className="small">Sign Up</a>
+              </div>
+            </div>
+          );
+        }
+
+
+        return (
+          <div className="app-container">
+            <Navbar />
+            <div className="reset-container">
+              <div className="reset-panel panel">
+                <SignInForm />
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      const root = ReactDOM.createRoot(document.getElementById('root'));
+      root.render(<SignInPage />);
+    </script>
+  </body>
+</html>

@@ -20,10 +20,12 @@ Typical Usage Example:
     score = calculate_compatibility(user1_vector, user2_vector)
     print(f"User Compatibility: {score:.2f}")
 """
+
+from backend.echoDB import db_crud as crud, db_schemas as models          # To fetch data from the database if needed
 import numpy as np                   # For vector math and similarity calculations
 from typing import List, Dict        # For clean function type hints
 from sklearn.metrics.pairwise import cosine_similarity  # Optional: built-in cosine sim
-from .. import crud, models          # To fetch data from the database if needed
+
 
 def _score():
     #some logic

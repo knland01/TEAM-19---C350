@@ -28,11 +28,11 @@ from dotenv import load_dotenv
 load_dotenv()
 
 class Settings(BaseSettings):
-    database_url: str
-    spotify_client_id: str
-    spotify_client_secret: str
-    spotify_redirect_uri: str
-    jwt_secret: str
+    DATABASE_URL: str
+    SPOTIFY_CLIENT_ID: str
+    SPOTIFY_CLIENT_SECRET: str
+    SPOTIFY_REDIRECT_URI: str
+    JWT_SECRET: str
 
     class Config:
         env_file = ".env"  # Optional redundancy, Pydantic can use this too

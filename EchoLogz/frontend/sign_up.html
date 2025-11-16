@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Sign up - EchoLogz</title>
+
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="pw-style.css"/>
+
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+
+    <!-- Don't use this in production: -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="text/babel">
+      const {useState} = React;
+
+      function SignUpPage() {
+        const [email, setEmail] = useState('');
+        const [password, setPassword] = useState('');
+        const [confirmPassword, setConfirmPassword] = useState('');
+        const [verificationCode, setVerificationCode] = useState('');
+        const [step, setStep] = useState(1); // 1: Info, 2: Code
+        const [loading, setLoading] = useState(false);
+        const [errors, setErrors] = useState({});
+
+        function validateEmail(email) {
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          return emailRegex.test(email);
+        }
+
+        function validatePassword(password) {
+          return password.length >= 8;
+        }
+
+        function handleSignUpSubmit() {
+          setErrors({});
+          const newErrors = {};
+
+          if (!email) newErrors.email = 'Email is required';
+          else if (!validateEmail(email)) newErrors.email = 'Invalid email address';
+
+          if (!password) newErrors.password = 'Password is required';
+          else if (!validatePassword(password)) newErrors.password = 'Password must be at least 8 characters';
+
+          if (!confirmPassword) newErrors.confirmPassword = 'Please confirm your password';
+          else if (password !== confirmPassword) newErrors.confirmPassword = 'Passwords do not match';
+
+          if (Object.keys(newErrors).length > 0) {
+            setErrors(newErrors);
+            return;
+          }
+
+          setLoading(true);
+          // Simulate API call
+          setTimeout(() => {
+            setLoading(false);
+            setStep(2);
+          }, 1200);
+        }
+
+        function handleCodeSubmit() {
+          setErrors({});
+          if (!verificationCode) {
+            setErrors({ code:'Verification code is required'});
+            return;
+          }
+          if (verificationCode.length !== 6) {
+            setErrors({code: 'Code must be 6 digits'});
+            return;
+          }
+
+          setLoading(true);
+          // Simulate API call
+          setTimeout(() => {
+            setLoading(false);
+            window.location.href = 'index.html';
+          }, 1200);
+        }
+
+        function Navbar() {
+          return (
+            <nav className="navbar">
+              <div className="navbar-left">
+                <header className="site-brand">
+                  <div className="logo">EL</div>
+                  <div>
+                    <h1>EchoLogz</h1>
+                    <p className="lead">SNAPPY TAGLINE HERE</p>
+                  </div>
+                </header>
+              </div>
+              <div className="navbar-right">
+                <a href="sign_in.html" className="nav-link">Sign In</a>
+                <a href="sign_up.html" className="nav-link signup">Sign Up</a>
+              </div>
+            </nav>
+          );
+        }
+
+        function StepIndicator() {
+          return (
+            <div className="step-indicator">
+              <div className={`step ${step >= 1 ? 'active' : ''} ${step > 1 ? 'completed' : ''}`}>
+                <div className="step-number">1</div>
+                <div className="step-label">Account</div>
+              </div>
+              <div className="step-line"></div>
+              <div className={`step ${step >= 2 ? 'active' : ''} ${step > 2 ? 'completed' : ''}`}>
+                <div className="step-number">2</div>
+                <div className="step-label">Verify</div>
+              </div>
+            </div>
+          );
+        }
+
+        function AccountStep() {
+          return (
+            <div className="reset-form">
+              <h2>Create Your Account</h2>
+
+              <div className="form-group">
+                <label htmlFor="email">Email Address</label>
+                <input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  placeholder="Enter your email address"
+                  className={errors.email ? 'error' : ''}
+                />
+                {errors.email && <div className="error-message">{errors.email}</div>}
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="password">Password</label>
+                <input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  placeholder="Create a password"
+                  autoComplete="new-password"
+                  className={errors.password ? 'error' : ''}
+                />
+                {errors.password && <div className="error-message">{errors.password}</div>}
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="confirmPassword">Confirm Password</label>
+                <input
+                  id="confirmPassword"
+                  type="password"
+                  value={confirmPassword}
+                  onChange={e => setConfirmPassword(e.target.value)}
+                  placeholder="Confirm password"
+                  autoComplete="new-password"
+                  className={errors.confirmPassword ? 'error' : ''}
+                />
+                {errors.confirmPassword && (<div className="error-message">{errors.confirmPassword}</div>)}
+              </div>
+
+              <button
+                className="btn primary full-width"
+                onClick={handleSignUpSubmit}
+                disabled={loading}
+              >
+                {loading ? 'Creating Account...' : 'Sign Up'}
+              </button>
+            </div>
+          );
+        }
+
+        function CodeStep() {
+          return (
+            <div className="reset-form">
+              <h2>Enter Verification Code</h2>
+              <p className="muted">We've sent a 6-digit code to <strong>{email}</strong></p>
+              
+              <div className="form-group">
+                <label htmlFor="code">Verification Code</label>
+                <input
+                  id="code"
+                  type="text"
+                  value={verificationCode}
+                  onChange={e => setVerificationCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                  placeholder="000000"
+                  maxLength="6"
+                  className={`code-input ${errors.code ? 'error' : ''}`}
+                />
+                {errors.code && <div className="error-message">{errors.code}</div>}
+              </div>
+
+              <button 
+                className="btn primary full-width" 
+                onClick={handleCodeSubmit}
+                disabled={loading}
+              >
+                {loading ? 'Verifying...' : 'Verify Code'}
+              </button>
+
+              <button 
+                className="btn secondary full-width" 
+                onClick={() => setStep(1)}
+                style={{marginTop: '12px'}}
+              >
+                Back to Sign Up
+              </button>
+            </div>
+          );
+        }
+
+        return (
+          <div className="app-container">
+            <Navbar />
+
+            <div className="reset-container">
+              <div className="reset-panel panel">
+                <StepIndicator />
+                {step === 1 && <AccountStep />}
+                {step === 2 && <CodeStep />}
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      const root = ReactDOM.createRoot(document.getElementById('root'));
+      root.render(<SignUpPage />);
+    </script>
+  </body>
+</html>
