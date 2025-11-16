@@ -23,12 +23,20 @@ Typical Usage Example:
 import numpy as np                   # For vector math and similarity calculations
 from typing import List, Dict        # For clean function type hints
 from sklearn.metrics.pairwise import cosine_similarity  # Optional: built-in cosine sim
-from echoDB import db_crud as crud, db_schemas as models          # To fetch data from the database if needed
+from ..echoDB import db_crud as crud, db_schemas as models          # To fetch data from the database if needed
 
-def _score():
-    #some logic
-    return #score
+def compare_users(user_a_vec: Dict, user_b_vec: Dict) -> float:
+    """Calculate and return the compatibility score between two users based on their feature vectors."""
+    # Convert feature dicts to sorted numpy arrays for consistency
+    if not user_a_vec or not user_b_vec:
+        return 0.0
 
-def compare_users():
-    return
+    if user_a_vec == user_b_vec:
+        return 1.0
+    
+    features = sorted(set(user_a_vec.keys()).union(set(user_b_vec.keys())))
+    vec_a = np.array([user_a_vec.get(f, 0) for f in features]).reshape(1, -1)
+    vec_b = np.array([user_b_vec.get(f, 0) for f in features]).reshape(1, -1)
 
+    score = cosine_similarity(vec_a, vec_b)[0][0]
+    return score
