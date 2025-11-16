@@ -13,12 +13,14 @@ Secure storage notes
 - Tie Spotify tokens to the EchoLogz user (foreign key to your users table).
 """
 
+
+from backend.core.config import settings
 # AUTH SKELETON:
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import RedirectResponse
 import os, base64, requests
 from urllib.parse import urlencode
-from core.config import settings
+
 
 router = APIRouter(prefix="/auth/spotify", tags=["spotify-auth"])
 

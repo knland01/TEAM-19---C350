@@ -19,10 +19,11 @@ Typical Usage Example (from another module):
     db_user = crud.get_user_by_id(db, user_id=1)
 """
 
-from sqlalchemy.orm import Session
-from . import db_schemas, db_validation as val, db_session
+from backend.echoDB import db_schemas, db_validation as val
 from .db_schemas import User
+from backend.echoDB import db_session
 from fastapi import HTTPException, status
+from sqlalchemy.orm import Session
 
 def create_user_with_hash(
     db: Session, username: str, email: str | None, hashed_pw: str

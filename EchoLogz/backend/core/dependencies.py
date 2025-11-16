@@ -1,6 +1,6 @@
 
 from fastapi import Depends,  HTTPException, status
-from echoDB.db_session import SessionLocal
+from backend.echoDB.db_session import SessionLocal
 #from routers.r_auth import decode_jwt  # or wherever = auth utils
 # from typing import Generator
 

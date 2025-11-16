@@ -14,7 +14,7 @@ Files Connected:
 - db_session.py   → Sets up database engine, session, and Base class
 
 Run with Terminal Command:
-            uvicorn main:app --reload
+            uvicorn backend.main:app --reload
 
 Access the running server at: 
             http://127.0.0.1:8000/
