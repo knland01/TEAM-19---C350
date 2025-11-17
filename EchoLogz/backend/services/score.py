@@ -13,7 +13,7 @@ Purpose:
 Acts as the brain of the EchoLogz backend—responsible for interpreting data
 and generating the 'compatibility scores'.
 
-Assignment Goals:
+Goals:
 -----------------
 --- Module = Math only (Feature extraction from Spotify JSON will occur in spot_feature_vectors.py.)
 1. Implement the '_score' function to compute a similarity / 
@@ -22,12 +22,6 @@ Assignment Goals:
    compatibility with a target user.
 3. Keep this module *web-agnostic*: no FastAPI, no HTTP logic.
    It should be importable and testable as pure Python.
-
-Typical Usage Example:
-    from services.scores import calc_compatibility
-
-    score = calc_compatibility(user1_vector, user2_vector)
-    print(f"User Compatibility: {score:.2f}")
 
 """
 

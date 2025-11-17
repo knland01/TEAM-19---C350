@@ -8,24 +8,28 @@ access token provided by the OAuth flow in spotify_auth.py.
 Typical responsibilities:
 - Fetch the current user's Spotify profile
 - Retrieve playlists and tracks
-- Access audio feature data (energy, tempo, valence, etc.)
+- Access audio feature data (energy, tempo, valence...)
 - Handle basic error checking and response validation
 
 This module never deals with login, redirects, or token exchange—that's 
 the router's job (spotify_auth.py). It only performs authorized data retrieval and returns parsed JSON responses for the rest of the backend to use.
 
-Example routes that may call these functions:
-- /users/me            -> get_user_profile()
-- /playlists           -> get_user_playlists()
-- /playlists/{id}/tracks -> get_playlist_tracks()
+Future API routes that may call these functions:
+    - /users/me              -> get_user_profile()
+    - /playlists             -> get_user_playlists()
+    - /playlists/{id}/tracks -> get_playlist_tracks()
 
 Security notes:
 - Requires a valid access_token from spotify_auth.py
 - Do not store tokens here; pass them in as function arguments
+_______________________________________
+Modules using spot_calls.py:
+- spot_feature_vectors.py
+_______________________________________
 """
 
-# EXAMPLE:
-import requests
+# EXTERNAL IMPORTS:
+import requests     # allows back-end to perform HTTP requests
 
 BASE_URL = "https://api.spotify.com/v1"
 

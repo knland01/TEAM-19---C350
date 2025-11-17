@@ -12,7 +12,7 @@ the route completes (ex: code after a 'yield').
 
 NOTE: Shared, reusable dependency functions belong here. Dependency functions that
 are specific to a single router (such as auth-related dependencies) should
-live in that router’s own module instead.
+live in that router's own module instead.
 
 NOTE: These are not “dependencies” in the normal Python import sense. 
 Instead, they are DI providers that FastAPI injects into routes. 

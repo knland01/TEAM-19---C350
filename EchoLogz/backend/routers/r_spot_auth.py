@@ -5,24 +5,28 @@ MODULE: Spotify OAuth Router - The Gatekeeper (r_spot_auth.py)
 ---------------------------------------------------------------
 
 Handles the OAuth dance with Spotify:
-- /auth/spotify/login      -> Redirect user to Spotify consent
-- /auth/spotify/callback   -> Exchange code for tokens
+- /auth/spotify/login              -> Redirect user to Spotify consent
+- /auth/spotify/callback           -> Exchange code for tokens
 - (optional) /auth/spotify/refresh -> Refresh access token
 
-Secure storage notes
-- Never return raw Spotify tokens to the client in production.
-- Encrypt/secure tokens at rest; store refresh_token to renew access.
+Secure storage notes:
+- Never return raw Spotify tokens to the client.
+- Encrypt/secure tokens at rest - store refresh_token to renew access.
 - Tie Spotify tokens to the EchoLogz user (foreign key to your users table).
+────────────────────────────────────────────
+Modules using r_auth.py:
+- main.py (only)
+────────────────────────────────────────────
 """
 
-
-from EchoLogz.backend.echoDB import db_tables
+# INTERNAL MODULES:
+from backend.echoDB import db_tables
 from backend.core.config import settings
 from backend.core.dependencies import get_db
 from backend.core.security import get_current_user
 from backend.echoDB import db_crud
 
-
+# EXTERNAL MODULES:
 from datetime import datetime, timedelta, timezone
 from fastapi import APIRouter, HTTPException, Depends, status
 from fastapi.responses import RedirectResponse
@@ -40,7 +44,7 @@ SCOPES = "user-read-email playlist-read-private"
 
 
 # -------------------------------------------------------------------------
-#    HELPER FUNCTIONS
+#    HELPER FUNCTIONS - specific only to r_spot_auth.py
 # -------------------------------------------------------------------------
 def _basic_auth_header(client_id: str, client_secret: str) -> dict:
     token = base64.b64encode(f"{client_id}:{client_secret}".encode()).decode()
@@ -65,7 +69,6 @@ def get_current_spotify_account(db: Session = Depends(get_db),
         )
 
     return account
-
 
 # ------------------------------------------------------------------
 # Routes

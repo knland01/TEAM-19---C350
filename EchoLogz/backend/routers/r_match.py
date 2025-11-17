@@ -21,8 +21,10 @@ Purpose:
 --------
 Acts as the gateway between the EchoLogz frontend and the internal scoring system.
 
-Modules using r_match.py:
-- main.py
+────────────────────────────────────────────
+Modules using r_auth.py:
+- main.py (only)
+────────────────────────────────────────────
 
 """
 

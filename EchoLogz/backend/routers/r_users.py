@@ -18,9 +18,13 @@ What this module DOES NOT do:
   services/spotify_calls.py).
 - No business rules beyond simple request → service delegation.
 
-Outcome:
-- Thin routing layer that converts HTTP requests into db_crud calls and
-  returns clean JSON responses.
+Outcome: Thin routing layer that converts HTTP requests into db_crud calls and
+        returns clean JSON responses.
+
+────────────────────────────────────────────
+Modules using r_auth.py:
+- main.py (only)
+────────────────────────────────────────────
 """
 
 
@@ -28,7 +32,7 @@ Outcome:
 # INTERNAL IMPPORTS:
 from backend.core.dependencies import get_db
 from backend.echoDB import db_crud as crud
-from EchoLogz.backend.echoDB import db_schemas as val
+from backend.echoDB import db_schemas as val
 
 # EXTERNAL IMPORTS:
 from fastapi import APIRouter, Depends, HTTPException, status, Response

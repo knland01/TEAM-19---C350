@@ -20,7 +20,8 @@ INTRO FUNCTIONS:
 - GET  /auth/me
 ────────────────────────────────────────────
 Modules using r_auth.py:
-- main.py
+- main.py (only)
+────────────────────────────────────────────
 
 INTERNAL IMPORTS
 ----------------
