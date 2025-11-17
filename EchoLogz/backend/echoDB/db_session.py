@@ -1,5 +1,5 @@
 """
-Database Control Center
+MODULE: Database Control Center (dp_sessions.py)
 ────────────────────────────────────────────
 Handles all low-level database setup:
 - Defines the connection URL (SQLite for local dev)

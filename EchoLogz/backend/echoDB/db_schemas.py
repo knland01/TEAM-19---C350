@@ -1,13 +1,12 @@
 """
-Database ORM Models: DB Blueprint - ORM table models
-
-SQAlchemy ORM models (Object-Relational Mapping models) are Python classes that represent tables in a relational database. Each class corresponds to one table, and each class attribute corresponds to a database column. The ORM automatically translates between Python objects and SQL queries, so you can work with database rows using normal Python code instead of writing raw SQL statements. 
-
-ORM models are *pythonic schemas* that are also mapped directly to actual database tables — meaning they act as both the blueprint and the concrete table representation at once.
+MODULE: Database ORM Models: DB Blueprint - ORM table models (db_schemas.py)
 
 This module defines the database schema for EchoLogz using SQLAlchemy ORM. 
 Each model/class represents a table in the database and maps Python objects 
 to relational database records.
+
+NOTE: SQAlchemy ORM models (Object-Relational Mapping models) are Python classes that represent tables in a relational database. Each class corresponds to one table, and each class attribute corresponds to a database column. The ORM automatically translates between Python objects and SQL queries, so you can work with database rows using normal Python code instead of writing raw SQL statements. 
+NOTE: ORM models are *pythonic schemas* that are also mapped directly to actual database tables — meaning they act as both the blueprint and the concrete table representation at once.
 
 Responsibilities:
 - Defines table structures and their columns (schemas).

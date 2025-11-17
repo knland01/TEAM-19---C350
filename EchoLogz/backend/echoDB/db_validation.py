@@ -1,5 +1,5 @@
 """
-Data Validation Module (API-facing layer for DB)
+MODULE: Data Validation - API-facing layer for DB (db_validation.py)
 
 This module defines Pydantic models (schemas) used by FastAPI to validate, 
 serialize, and deserialize data flowing between the API and the database.
@@ -11,47 +11,52 @@ Responsibilities:
 - Keep a clear separation between internal database models/schemas (in db_schemas.py) 
   and external API-facing representations. Prevent raw ORM objects from being exposed to the outside world.
 
-Files Connected:
-- db_schemas.py → Database table definitions (internal structure).
-- db_crud.py   → Uses schemas to validate input/output during DB operations.
-- main.py   → References schemas for API request and response models.
+Modules Using db_validation:
+- r_auth.py
+- r_users.py
 
+EXTERNAL IMPORTS (dependencies):
+    -- [PYDANTIC] --
+    # BaseModel: Every Pydantic model must extend BaseModel to become a “validator class".
+                - Type Val, Auto-converts types 
+                - Blocks invalid data, creates .dict(), .json(), .model_validate() methods
+                - Drives FastAPI's request/response validation layer
+    # EmailStr: Pydantic type for validating email address formats - throws FastAPI 422 error.
+    # ConfigDict: 
+
+INTERNAL IMPORTS (dependencies): 
+    - None
 """
 
 from pydantic import BaseModel, EmailStr, ConfigDict
-# BaseModel: Every Pydantic model must extend BaseModel to become a “validator class".
-# ...  ... Type Val, Auto-converts types 
-# ...  ... Blocks invalid data, creates .dict(), .json(), .model_validate() methods
-# ...  ... Drives FastAPI's request/response validation layer
-
-# EmailStr: Pydantic type for validating email address formats - throws FastAPI 422 error.
-
-
 
 # ---------- Inputs ----------
-class UserBase(BaseModel):
-    name: str
-    email: EmailStr
-
 class UserCreate(BaseModel):
+    """Validates incoming JSON when the user is being created."""
     username: str
     password: str
     email: EmailStr | None = None # optional value; default=None
 
+class UserUpdate(BaseModel):
+    """Validates schema for updating user accounts."""
+    username: str | None = None
+    password: str | None = None
+    email: EmailStr | None = None 
+
 # ---------- Outputs ----------
 class UserOut(BaseModel):
+    """Validates / shapes user DB data API sends back to the client."""
     id: int
     username: str
     email: EmailStr | None = None
-    model_config = ConfigDict(from_attributes=True) # <-- pydantic v2 syntax
+    model_config = ConfigDict(from_attributes=True) # ORM objects don't use dicts.
+    # pydantic v2 syntax
     # Pydantic model can receive objects with attributes (like SQLAlchemy ORM models) -> read their data 
     # ... using dot-notation instead of expecting a dictionary.
 
 class TokenOut(BaseModel):
+    """Validates standard OAuth2 token response format."""
     access_token: str
     token_type: str = "bearer"
 
-class UserUpdate(BaseModel):
-    username: str | None = None
-    password: str | None = None
-    email: EmailStr | None = None 
+

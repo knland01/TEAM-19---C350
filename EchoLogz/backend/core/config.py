@@ -1,5 +1,5 @@
 """
-Configuration Center (config.py)
+MODULE: Configuration Center (config.py)
 --------------------------------
 This module manages all environment variables and application-wide settings
 for the EchoLogz backend.

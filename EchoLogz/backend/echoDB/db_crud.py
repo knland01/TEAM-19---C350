@@ -1,5 +1,5 @@
 """
-CRUD Operations Module
+MODULE: CRUD Operations (db_crud.py)
 
 This module defines the Create, Read, Update, and Delete (CRUD) operations 
 for interacting with the EchoLogz database via SQLAlchemy ORM. 
