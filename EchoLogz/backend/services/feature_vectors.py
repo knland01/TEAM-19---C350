@@ -2,7 +2,7 @@
 
 Purpose:
     Generates a numeric "taste vector" for a linked Spotify user. This vector is
-    the standardized representation of the user’s music preferences used for
+    the standardized representation of the user's music preferences used for
     compatibility scoring.
 
 What this function must do:
@@ -22,16 +22,16 @@ What this function must do:
     4. Get a set of Spotify tracks linked to that user
         Examples:
             Top N tracks from Spotify (short/medium/long term, based on sample)
-            Or: tracks they’ve saved/liked and EchoLogz has stored as track IDs
-        NOTE: you’re storing track IDs/URIs, not raw audio or giant
+            Or: tracks they've saved/liked and EchoLogz has stored as track IDs
+        NOTE: you're storing track IDs/URIs, not raw audio or giant
         metadata blobs.
 
     5. Fetch audio features for those tracks
-        - Use Spotify’s /audio-features endpoint for the batch of track IDs to get
+        - Use Spotify's /audio-features endpoint for the batch of track IDs to get
           things like: danceability, energy, valence, tempo, loudness, acousticness, 
                        instrumentalness, liveness, speechiness
         - maybe genre / artist-level embeddings if you add those later
-        This gives you a matrix: num_tracks × num_features.
+        This gives you a matrix: num_tracks x num_features.
 
     6. Reduce all track features to a single user vector
         - Aggregate across tracks to get a fixed-length “taste vector”
@@ -50,7 +50,7 @@ IMPORTANT NOTE:
     - This function must only return derived numeric features, never raw Spotify content.
 """
 
-
+from sqlalchemy.orm import Session
 
 
 def build_feature_vector(db: Session, user_id: int, sample: str) -> list[float]:
@@ -58,6 +58,6 @@ def build_feature_vector(db: Session, user_id: int, sample: str) -> list[float]:
     ...
     return
 
-def _encode_features_to_vector(raw_features: dict) -> list[float]:
+def _matrix_features_to_vector(raw_features: dict) -> list[float]:
     # math only
     ...
