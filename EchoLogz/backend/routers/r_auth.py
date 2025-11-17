@@ -17,8 +17,7 @@ from datetime import datetime, timedelta, timezone
 import os
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer, \
-    OAuth2PasswordRequestForm
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import jwt, JWTError
 from passlib.context import CryptContext
 from sqlalchemy.orm import Session
@@ -38,7 +37,7 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 # ------------------------------------------------------------------
-# Helpers
+# Helpers: only used w/ r_auth FastAPI functions - so code included here
 # ------------------------------------------------------------------
 def _hash_password(plain: str) -> str:
     return pwd_context.hash(plain)

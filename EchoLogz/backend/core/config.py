@@ -13,20 +13,19 @@ Purpose:
 Acts as the centralized "control panel" for the backend — keeping sensitive
 information (like keys and connection strings) organized and out of code.
 
-Typical Usage Example (access from anywhere):
+Usage Example (access from anywhere):
     from backend.core.config import settings
 
-    print(settings.app_name)
-    print(settings.database_url)
-
+    print(settings.JWT_SECRET)
 """
 
-from pydantic import BaseSettings
-from dotenv import load_dotenv
+from pydantic import BaseSettings # Pydantic: Library for data validation / settings management
+# from dotenv import load_dotenv # <--- redundant to pydantic
 
 # Load the .env file first
-load_dotenv()
+# load_dotenv() <-- does the same thing as pydantic class Config
 
+# Pydantic:
 class Settings(BaseSettings):
     DATABASE_URL: str
     SPOTIFY_CLIENT_ID: str
@@ -34,7 +33,8 @@ class Settings(BaseSettings):
     SPOTIFY_REDIRECT_URI: str
     JWT_SECRET: str
 
-    class Config:
-        env_file = ".env"  # Optional redundancy, Pydantic can use this too
+    # Populate Values from .env file:
+    class Config:              # ... Auto loads environment variables from .env <-- everything is string text
+        env_file = ".env"      # ... Pydantic v.1.10.24 syntax 
 
 settings = Settings()

@@ -33,10 +33,18 @@ from .db_session import Base
 # from . import db_crud, db_session, schema
 
 
-# Typical Entry Example:
+# Typical Entry Example (SQAlchemy ORM Model --> DB SCHEMA):
 class User(Base):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String, unique=True, nullable=False)
     email = Column(String, unique=True, nullable=False)
     hashed_password = Column(String, nullable=False)
+
+# TRANSLATES TO:
+# CREATE TABLE users (
+#     id INTEGER PRIMARY KEY,
+#     username VARCHAR NOT NULL UNIQUE,
+#     email VARCHAR NOT NULL UNIQUE,
+#     hashed_password VARCHAR NOT NULL
+# );
