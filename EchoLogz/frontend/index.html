@@ -49,6 +49,7 @@
         }
 
         function connectSpotify(){
+          // window.location.href="/auth/spotify/login"; <-- removed from original
           setOauthConnected(true);
           alert('[Spotify OAuth Placeholder]');
         }
@@ -57,11 +58,9 @@
           if(!playlistUrl){ alert('[Submit Playlist Placeholder]'); return; }
           setJoined(true);
         }
-
         return (
           <div className="app-container">
-            <Navbar signedIn={signedIn} username={username} />
-
+            <Navbar signedIn={signedIn} username={username} /> 
             <div className="app">
               <aside className="panel">
                 <section className="create-join">
@@ -135,7 +134,7 @@
                   </div>
                   <div>
                     <div className="score-bubble" 
-                         style={{background: `conic-gradient(var(--accent-color) 0deg, var(--accent-color) ${compatibility * 3.6}deg, #333 ${compatibility * 3.6}deg 360deg)`}}>
+                          style={{background: `conic-gradient(var(--accent-color) 0deg, var(--accent-color) ${compatibility * 3.6}deg, #333 ${compatibility * 3.6}deg 360deg)`}}>
                       <span>{compatibility}%</span>
                     </div>
                   </div>
