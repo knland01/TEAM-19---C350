@@ -19,7 +19,7 @@ Secure storage notes
 from EchoLogz.backend.echoDB import db_tables
 from backend.core.config import settings
 from backend.core.dependencies import get_db
-from backend.routers.r_auth import get_current_user
+from backend.core.security import get_current_user
 from backend.echoDB import db_crud
 
 

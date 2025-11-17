@@ -21,28 +21,15 @@ Purpose:
 --------
 Acts as the gateway between the EchoLogz frontend and the internal scoring system.
 
-Typical Usage Example:
-----------------------
-POST /match/compare
+Modules using r_match.py:
+- main.py
 
-Request Body:
-{
-    "user_a_id": 12,
-    "user_b_id": 37,
-    "sample": 100
-}
-
-Response Body:
-{
-    "score": 0.83,
-    "pair_id": 58
-}
 """
 
 # INTERNAL MODULES:
 from backend.core.dependencies import get_db
 from backend.services.score import calc_compatibility
-from ..services.feature_vectors import build_feature_vector
+from backend.services.spot_feature_vectors import build_feature_vector
 
 # EXTERNAL MODULES:
 from fastapi import APIRouter, Depends, HTTPException, status

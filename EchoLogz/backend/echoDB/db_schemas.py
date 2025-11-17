@@ -1,9 +1,9 @@
 """
 ---------------------------------------------------------------------
-MODULE: Data Schema Validation - API-facing layer for DB (db_schemas.py)
+MODULE: DB Schema Validation - API-facing layer for DB (db_schemas.py)
 ---------------------------------------------------------------------
 
-This module defines Pydantic models (schemas) used by FastAPI to validate, 
+This module defines PYDANTIC MODELS (schemas) used by FastAPI to validate, 
 serialize, and deserialize data flowing between the API and the database.
 
 Responsibilities:
@@ -13,6 +13,7 @@ Responsibilities:
 - Keep a clear separation between internal database models/schemas (in db_tables.py) 
   and external API-facing representations. Prevent raw ORM objects from being exposed to the outside world.
 
+────────────────────────────────────────────
 Modules Using db_schemas:
 - r_auth.py
 - r_users.py
@@ -28,6 +29,7 @@ EXTERNAL IMPORTS (dependencies):
 
 INTERNAL IMPORTS (dependencies): 
     - None
+────────────────────────────────────────────
 """
 
 # EXTERNAL IMPORTS:

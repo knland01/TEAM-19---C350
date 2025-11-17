@@ -11,29 +11,26 @@ Responsibilities:
 - Contains reusable functions that handle database logic (insert, query, update, delete).
 - Keeps the main API routers clean and focused only on HTTP logic + request handling.
 
+────────────────────────────────────────────
 Modules/Files using db_crud.py:
 - r_auth.py 
 - r_users.py
 - r_spot_auth.py
 - r_match.py
-- feature_vectors.py
+- spot_feature_vectors.py
 
 INTERNAL IMPORTS (dependencies):
 - db_tables.py       -> Defines database tables and relationships.
-- db_schemas.py    -> Defines Pydantic models for request/response validation.
+- db_schemas.py      -> Defines Pydantic models for request/response validation.
 
 EXTERNAL IMPORTS:
+- SQAlchemy.orm.Session
+- datetime.datetime
 
 Connected Modules (indirectly)
 - db_session.py       -> Provides SessionLocal used by routers, not directly used here.
-
-Typical Usage (from a router or service layer):
-    from backend.echoDB import db_crud
-    from backend.core.dependencies import get_db
-
-    def route_handler(db: Session = Depends(get_db)):
-        user = db_crud.get_user_by_id(db, user_id=1)
-        return user
+────────────────────────────────────────────
+Typical Usage: SEE r_auth.get_current_user
 """
 # INTERNAL IMPORTS:
 from EchoLogz.backend.echoDB import db_tables

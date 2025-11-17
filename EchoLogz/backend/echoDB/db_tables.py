@@ -15,25 +15,17 @@ Responsibilities:
 - Maps Python classes to relational database tables using SQLAlchemy ORM.
 - Establishes relationships (foreign keys, joins) between tables.
 - Inherits from Base (provided by db_session.py) to register models with SQLAlchemy.
-
+────────────────────────────────────────────
 Modules using db_tables.py:
 - db_crud.py
 - db_session.py
-
 
 INTERNAL IMPORTS:
 - db_session.py     -> Provides the SQLAlchemy Base class used for model inheritance.
 
 EXTERNAL IMPORTS:
 - SQAlchemy
-
-- db_crud.py        -> Uses these SQAlchemy ORM models to perform database operations.
-- db_schemas.py  -> Defines Pydantic models (partially/fully mirrors Orm Models) used for API request/response validation.
-
-Example of use (inside db_crud.py):
-    def get_user_by_id(db, user_id: int):
-        return db.query(db_tables.User).filter(db_tables.User.id == user_id).first()
-
+────────────────────────────────────────────
 NOTE: Spotify Developer Terms = “Except as otherwise set out in these Developer Terms, you may not store, aggregate or create compilations or databases of Spotify Content, other than as strictly necessary to operate your SDA.”
 WORK AROUND: Store Track IDs + URIs (this is ok)
         
@@ -72,7 +64,7 @@ class User(Base):
 #     username VARCHAR NOT NULL UNIQUE,
 #     email VARCHAR NOT NULL UNIQUE,
 #     hashed_password VARCHAR NOT NULL
-# );
+# ); # but then also connected directly to the actual table -- not just the schema
 
 """ 
 EchoLogz Spotify Data Rules

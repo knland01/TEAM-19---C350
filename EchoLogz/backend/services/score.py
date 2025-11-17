@@ -3,7 +3,7 @@ MODULE: Compatibility Engine (Math-Only)
 
 This module is responsible only for vector math. Any raw data
 (ex: Spotify JSON) will be converted into numeric vectors in
-feature_vectors.py before being passed here.
+spot_feature_vectors.py before being passed here.
 
 Core Responsibilities:
 - Apply mathematical operations to vectors (ex: cosine similarity, weighted averages)
@@ -15,7 +15,7 @@ and generating the 'compatibility scores'.
 
 Assignment Goals:
 -----------------
---- Module = Math only (Feature extraction from Spotify JSON will occur in feature_vectors.py.)
+--- Module = Math only (Feature extraction from Spotify JSON will occur in spot_feature_vectors.py.)
 1. Implement the '_score' function to compute a similarity / 
    compatibility score between two feature vectors.
 2. Implement 'compare_users' to rank 1 or more users by their
