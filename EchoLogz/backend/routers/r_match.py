@@ -1,6 +1,7 @@
 """
-Match Router
-============
+----------------------------------------------------
+MODULE: Compatibility Match Router (r_match.py)
+----------------------------------------------------
 
 This router defines the API endpoints for user-to-user or entity-to-entity 
 matching within the EchoLogz ecosystem.

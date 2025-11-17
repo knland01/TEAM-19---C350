@@ -1,17 +1,19 @@
 """
-User Router
+----------------------------------------------------
+MODULE: User Router (r_users.py)
+----------------------------------------------------
 
 Defines the API routes under "/users" for EchoLogz app users.
 
 What this module DOES:
 - Declare HTTP endpoints (list, create, read, update, delete).
 - Delegate DB work to echoDB.db_crud.
-- Validate I/O with echoDB.db_validation Pydantic models.
+- Validate I/O with echoDB.db_schemas Pydantic models.
 - Use dependency injection to get a DB session.
 
 What this module DOES NOT do:
 - No raw SQL or ORM session management (see echoDB.db_session).
-- No table/model definitions (see echoDB.db_schemas).
+- No table/model definitions (see echoDB.db_tables).
 - No Spotify OAuth or API calls (see routers/spotify_auth.py and
   services/spotify_calls.py).
 - No business rules beyond simple request → service delegation.
@@ -23,12 +25,12 @@ Outcome:
 
 
 
-# from echoDB.db_session import get_db <--- removed
+# INTERNAL IMPPORTS:
 from backend.core.dependencies import get_db
 from backend.echoDB import db_crud as crud
-from backend.echoDB import db_validation as val
+from EchoLogz.backend.echoDB import db_schemas as val
 
-# EXAMPLE:
+# EXTERNAL IMPORTS:
 from fastapi import APIRouter, Depends, HTTPException, status, Response
 from sqlalchemy.orm import Session
 
@@ -36,8 +38,7 @@ from sqlalchemy.orm import Session
 
 router = APIRouter(prefix="/users", tags=["users"])
 
-@router.post("/", response_model=val.UserOut,
-             status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=val.UserOut, status_code=status.HTTP_201_CREATED)
 def create_user_endpoint(payload: val.UserCreate, db: Session = Depends(get_db)):
     """Create a new user and return the created record."""
     return crud.create_user(db, payload)

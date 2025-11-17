@@ -1,6 +1,8 @@
 
 """
-Spotify OAuth Router (Spotify Gatekeeper)
+---------------------------------------------------------------
+MODULE: Spotify OAuth Router - The Gatekeeper (r_spot_auth.py)
+---------------------------------------------------------------
 
 Handles the OAuth dance with Spotify:
 - /auth/spotify/login      -> Redirect user to Spotify consent
@@ -14,11 +16,12 @@ Secure storage notes
 """
 
 
+from EchoLogz.backend.echoDB import db_tables
 from backend.core.config import settings
 from backend.core.dependencies import get_db
 from backend.routers.r_auth import get_current_user
-from backend.echoDB import db_schemas, db_crud
-# from backend.echoDB.db_schemas import User
+from backend.echoDB import db_crud
+
 
 from datetime import datetime, timedelta, timezone
 from fastapi import APIRouter, HTTPException, Depends, status
@@ -47,8 +50,8 @@ def _basic_auth_header(client_id: str, client_secret: str) -> dict:
 # Dependencies - FastAPI Depends(...) Functions specific only to r_spot_auth.py
 # -------------------------------------------------------------------------------
 def get_current_spotify_account(db: Session = Depends(get_db), 
-                                current_user: db_schemas.User = Depends(get_current_user),
-                               ) -> db_schemas.SpotifyAccount:
+                                current_user: db_tables.User = Depends(get_current_user),
+                               ) -> db_tables.SpotifyAccount:
     """
     Returns the SpotifyAccount row for the logged-in EchoLogz user.
     Raises 404 or 400 if no Spotify link exists.
@@ -91,7 +94,7 @@ def login_spotify():
 def spotify_callback(
     code: str,
     db: Session = Depends(get_db),
-    current_user: db_schemas.User = Depends(get_current_spotify_account),
+    current_user: db_tables.User = Depends(get_current_spotify_account),
 ):
     token_url = "https://accounts.spotify.com/api/token"
     data = {

@@ -1,6 +1,8 @@
 
 """
+----------------------------------------------------
 MODULE: FastAPI Dependencies (core.dependencies.py)
+----------------------------------------------------
 
 This module contains FastAPI *dependency functions*—functions intended to be
 used with -- Depends(...) -- inside route handlers. FastAPI automatically calls

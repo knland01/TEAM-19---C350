@@ -10,7 +10,7 @@ It handles the following core responsibilities:
 - Defines basic API routes (starting with a simple root health check).
 
 Files Connected:
-- db_schemas.py     → Defines SQLAlchemy models (database structure)
+- db_tables.py     → Defines SQLAlchemy models (database structure)
 - db_session.py   → Sets up database engine, session, and Base class
 
 Run with Terminal Command:
@@ -24,6 +24,8 @@ import sys, os
 
 from starlette.staticfiles import StaticFiles
 
+from EchoLogz.backend.echoDB import db_tables
+
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__) + "/../.."))
 
 from fastapi import FastAPI
@@ -32,7 +34,7 @@ from fastapi.middleware.cors import CORSMiddleware
 # ... FRONT-END (DEV): 127.0.0.1:5500 --> BACK-END (DEV): 127.0.0.1:8000
 # ... FRONT-END (DEPLOY): https://echologz(or whatever).com --> BACK-END (DEPLOY): https://echologz(or whatever)/api.com
 from backend.routers import r_auth, r_spot_auth, r_status, r_match
-from backend.echoDB import db_schemas, db_session
+from backend.echoDB import db_session
 from backend.core.config import settings # Load (.env) variables via config.py
 from backend.routers import r_users
 from contextlib import asynccontextmanager
@@ -61,7 +63,7 @@ app.add_middleware(
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Runs when the app starts
-    db_schemas.Base.metadata.create_all(bind=db_session.engine)
+    db_tables.Base.metadata.create_all(bind=db_session.engine)
     yield
     # Runs when the app stops (if you need cleanup)
 

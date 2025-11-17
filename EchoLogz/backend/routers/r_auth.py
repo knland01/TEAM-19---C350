@@ -1,11 +1,13 @@
 """
+----------------------------------------------------
 MODULE: EchoLogz Auth Router (r_auth.py)
+----------------------------------------------------
 
 Responsibilities:
 Handles all authentication endpoints for the EchoLogz backend. 
 Provides login, token generation, and user verification using a database-backed (persistent data, not temporary) user store. 
 Uses JWT for stateless authentication (no server-side session storage). 
-All request/response schemas come from backend.echoDB.db_validation.
+All request/response schemas come from backend.echoDB.db_schemas.
 All database access is handled through SQLAlchemy sessions and CRUD utilities.
 
 NOTE: This module handles *EchoLogz user authentication only*. 
@@ -24,7 +26,7 @@ INTERNAL IMPORTS
 ----------------
     # core.config.settings:     JWT_SECRET
     # core.dependencies.get_db: Supplies SQAlchemy DB Session to each endpoint
-    # echoDB.db_validation:     Pydantic input / output schemas/models used by this auth router (r_auth). 
+    # echoDB.db_schemas:     Pydantic input / output schemas/models used by this auth router (r_auth). 
         - UserCreate 
         - UserOut 
         - TokenOut
@@ -71,7 +73,7 @@ EXTERNAL IMPORTS
 # INTERNAL MODULES:
 from backend.core.config import settings
 from backend.core.dependencies import get_db
-from backend.echoDB.db_validation import UserCreate, UserOut, TokenOut
+from EchoLogz.backend.echoDB.db_schemas import UserCreate, UserOut, TokenOut
 from backend.echoDB import db_crud
 
 # EXTERNAL MODULES: 
