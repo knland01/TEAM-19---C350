@@ -19,11 +19,9 @@ Usage Example (access from anywhere):
     print(settings.JWT_SECRET)
 """
 
-from pydantic import BaseSettings # Pydantic: Library for data validation / settings management
-# from dotenv import load_dotenv # <--- redundant to pydantic
+# from pydantic import BaseSettings # Pydantic: Library for data validation / settings management
+from pydantic_settings import BaseSettings, SettingsConfigDict # Pydantic v.2
 
-# Load the .env file first
-# load_dotenv() <-- does the same thing as pydantic class Config
 
 # Pydantic:
 class Settings(BaseSettings):
@@ -33,8 +31,11 @@ class Settings(BaseSettings):
     SPOTIFY_REDIRECT_URI: str
     JWT_SECRET: str
 
-    # Populate Values from .env file:
-    class Config:              # ... Auto loads environment variables from .env <-- everything is string text
-        env_file = ".env"      # ... Pydantic v.1.10.24 syntax 
+    # Populate Values from .env file (SWITCHED TO PYDANTIC V.2):
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        extra="ignore",     # ignore .env keys not in Settings
+    )
+
 
 settings = Settings()

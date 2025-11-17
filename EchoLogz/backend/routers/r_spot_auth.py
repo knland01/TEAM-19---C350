@@ -15,7 +15,6 @@ Secure storage notes
 
 
 from backend.core.config import settings
-# AUTH SKELETON:
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import RedirectResponse
 import os, base64, requests

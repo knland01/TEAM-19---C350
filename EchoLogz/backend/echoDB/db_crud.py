@@ -5,22 +5,28 @@ This module defines the Create, Read, Update, and Delete (CRUD) operations
 for interacting with the EchoLogz database via SQLAlchemy ORM. 
 
 Responsibilities:
-- Acts as the interface between API routes and the database.
-- Contains reusable functions that handle data logic (insert, query, update, delete).
-- Keeps the main API routes clean and focused on HTTP logic.
+- Data-access layer between API routers and DB.
+- Contains reusable functions that handle database logic (insert, query, update, delete).
+- Keeps the main API routers clean and focused only on HTTP logic + request handling.
 
-Files Connected:
-- db_schemas.py     → Defines database tables and relationships.
-- db_validation.py    → Defines Pydantic models for request/response validation.
-- db_session.py   → Provides the database session (SessionLocal) for queries.
+Connected Modules/files (directly):
+- db_schemas.py       -> Defines database tables and relationships.
+- db_validation.py    -> Defines Pydantic models for request/response validation.
+- database            -> SQLAlchemy-managed database connection (configured in db_session.py)
 
-Typical Usage Example (from another module):
-    from . import crud, db_schemas, db_session
-    db_user = crud.get_user_by_id(db, user_id=1)
+Connected Modules (indirectly)
+- db_session.py       -> Provides SessionLocal used by routers, not directly used here.
+
+Typical Usage (from a router or service layer):
+    from backend.echoDB import db_crud
+    from backend.core.dependencies import get_db
+
+    def route_handler(db: Session = Depends(get_db)):
+        user = db_crud.get_user_by_id(db, user_id=1)
+        return user
 """
 
 from backend.echoDB import db_schemas, db_validation as db_val
-# from .db_schemas import User
 from sqlalchemy.orm import Session
 
 def create_user_with_hash(db: Session, username: str, email: str | None, hashed_pw: str) -> db_schemas.User:

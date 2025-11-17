@@ -1,24 +1,28 @@
 """
-Database Models (Schemas): DB Blueprint - ORM table models
+Database ORM Models: DB Blueprint - ORM table models
+
+SQAlchemy ORM models (Object-Relational Mapping models) are Python classes that represent tables in a relational database. Each class corresponds to one table, and each class attribute corresponds to a database column. The ORM automatically translates between Python objects and SQL queries, so you can work with database rows using normal Python code instead of writing raw SQL statements. 
+
+ORM models are *pythonic schemas* that are also mapped directly to actual database tables — meaning they act as both the blueprint and the concrete table representation at once.
 
 This module defines the database schema for EchoLogz using SQLAlchemy ORM. 
 Each model/class represents a table in the database and maps Python objects 
 to relational database records.
 
 Responsibilities:
-- Defines table structures and their columns.
-- Maps Python classes to database tables.
+- Defines table structures and their columns (schemas).
+- Maps Python classes to relational database tables using SQLAlchemy ORM.
 - Establishes relationships (foreign keys, joins) between tables.
-- Provides a base class for all models via the imported Base.
+- Inherits from Base (provided by db_session.py) to register models with SQLAlchemy.
 
-Files Connected:
-- db_session.py → Supplies the Base class and engine connection.
-- db_crud.py     → Uses these models to perform database operations.
-- db_validation.py  → Mirrors model structure for data validation and serialization.
+Connected Modules:
+- db_session.py     -> Provides the SQLAlchemy Base class used for model inheritance.
+- db_crud.py        -> Uses these SQAlchemy ORM models to perform database operations.
+- db_validation.py  -> Defines Pydantic models (partially/fully mirrors Orm Models) used for API request/response validation.
 
 Example of use (inside db_crud.py):
     def get_user_by_id(db, user_id: int):
-        return db.query(models.User).filter(models.User.id == user_id).first()
+        return db.query(db_schemas.User).filter(db_schemas.User.id == user_id).first()
 
 
         

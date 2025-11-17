@@ -28,7 +28,7 @@ from sqlalchemy.orm import sessionmaker
 # ... ... EXAMPLE - production URL (uncomment and adjust as needed):
 # ... ... DATABASE_URL = "postgresql+psycopg2://user:password@localhost/echologz"
 
-"""DATABASE_URL = ... """ # <-- moved to .env
+DATABASE_URL = settings.DATABASE_URL
 
 # ------------------------------------------------------------------------------------
 # SQAlchemy Database Engine (connection bridge)
@@ -41,8 +41,6 @@ from sqlalchemy.orm import sessionmaker
 # ...    - Managing the Connection Pool <-- importent when hundreds of users (Postgres switch)
 # ...    - Talking to SQLite under the hood
 #
-
-DATABASE_URL = settings.DATABASE_URL
 
 engine = create_engine(
     DATABASE_URL,
