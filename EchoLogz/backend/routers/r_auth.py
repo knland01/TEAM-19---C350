@@ -83,17 +83,18 @@ from backend.echoDB.db_validation import UserCreate, UserOut, TokenOut
 from backend.echoDB import db_crud
 
 
-router = APIRouter(prefix="/auth", tags=["auth"])
+router = APIRouter(prefix="/auth", tags=["auth"])                 
+# logically groups all auth - routers defined below w/ @router, adding '/auth' to each endpoint (ex: /auth/signup)
 
 # ------------------------------------------------------------------
 # Config
 # ------------------------------------------------------------------
 SECRET_KEY = settings.JWT_SECRET
-ALGORITHM = "HS256"               
+ALGORITHM = "HS256"                                               # HS256 = JWT signing/verification algorithm
 ACCESS_TOKEN_EXPIRE_MIN = 60
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto") # bcrypt = password hashing algorithm
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")      # extracts Bearer JWT token from Authorization header
 
 # ------------------------------------------------------------------
 # Helpers: only used w/ r_auth FastAPI functions - so code included here
@@ -153,6 +154,12 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
 # ------------------------------------------------------------------
 # Routes
 # ------------------------------------------------------------------
+# .POST - HTTP endpoint that accepts POST requests: client sending data to server to create / process something.
+# .GET:    "Give me data."
+# .PUT:    "Replace existing thing with new thing."
+# .PATCH:  "Update the part of existing thing."
+# .DELETE: "Remove this thing."
+
 @router.post("/signup", response_model=UserOut, status_code=201)
 def signup(payload: UserCreate, db: Session = Depends(get_db)):
     """Creates a new user account.
