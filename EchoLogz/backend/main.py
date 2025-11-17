@@ -24,7 +24,7 @@ import sys, os
 
 from starlette.staticfiles import StaticFiles
 
-from EchoLogz.backend.echoDB import db_tables
+from backend.echoDB import db_tables
 
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__) + "/../.."))
 

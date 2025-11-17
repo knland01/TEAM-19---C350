@@ -84,8 +84,9 @@ class SpotifyAccountRead(SpotifyAccountBase):
     expires_at: datetime
     last_synced_at: datetime | None = None
 
-    class Config:
-        orm_mode = True
+    model_config = {
+        "from_attributes": True
+    }
 
 class SpotifyAccountUpdate(BaseModel):
     access_token: str | None = None

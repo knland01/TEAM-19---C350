@@ -100,7 +100,6 @@ def get_spotify_account_by_user_id(db: Session, user_id: int) -> db_tables.Spoti
         .first()
     )
 
-
 def create_or_update_spotify_account(
     db: Session,
     user_id: int,
@@ -111,7 +110,6 @@ def create_or_update_spotify_account(
     scope: str | None = None,
 ) -> db_tables.SpotifyAccount:
     account = get_spotify_account_by_user_id(db, user_id=user_id)
-
     if account is None:
         account = db_tables.SpotifyAccount(
             user_id=user_id,
