@@ -58,13 +58,59 @@ from backend.echoDB import db_crud
 
 # EXTERNAL IMPORTS:
 from sqlalchemy.orm import Session
+import numpy as np
+from datetime import datetime, timezone
+from backend.services.utils import normalize_vector
 
 
-def build_feature_vector(db: Session, user_id: int, sample: str) -> list[float]:
+def build_feature_vector(db: Session, user_id: int, sample: str = "medium_term") -> list[float] | None:
     # DB + Spotify + high-level orchestration
-    ...
-    return
 
-def _matrix_features_to_vector(raw_features: dict) -> list[float]:
+    # Step 1: Lookup EchoLogz user (assumes valid user_id given)
+    user = db_crud.get_user_by_id(db, user_id)
+    if not user:
+        return None
+
+    # Step 2: Lookup Spotify link
+    spotify_account = db_crud.get_spotify_account(db, user_id)
+    if not spotify_account or not spotify_account.access_token:
+        return None
+
+    # Step 3: Token lifecycle management
+    if _token_is_expired(spotify_account):
+        new_token, new_expiry = spot_calls.refresh_access_token(spotify_account.refresh_token)
+        if not new_token:
+            return None
+        spotify_account.access_token = new_token
+        spotify_account.token_expires_at = new_expiry
+        db.commit()
+
+    access_token = spotify_account.access_token
+
+    # Step 4: Get Spotify tracks for the user
+    track_ids = spot_calls.get_user_top_tracks(access_token, time_range=sample)
+    if not track_ids:
+        return None
+
+    # Step 5: Get audio features
+    raw_features = spot_calls.get_audio_features(access_token, track_ids)
+    if not raw_features:
+        return None
+
+    # Step 6–7: Reduce to taste vector and return
+    return _matrix_features_to_vector(raw_features)
+
+
+def _matrix_features_to_vector(raw_features: dict[str, dict[str, float]]) -> list[float]:
     # math only
-    ...
+
+    if not raw_features:
+        return []
+
+    matrix = np.array([list(track.values()) for track in raw_features.values()])
+    mean_vector = matrix.mean(axis=0)
+    return normalize_vector(mean_vector).tolist()
+
+
+def _token_is_expired(spotify_account) -> bool:
+    return spotify_account.token_expires_at < datetime.now(timezone.utc)
