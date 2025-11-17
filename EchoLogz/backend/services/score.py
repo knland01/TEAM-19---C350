@@ -50,11 +50,8 @@ def _score(vec1: Vector, vec2: Vector) -> float:
     - Uses ex: cosine similarity (?) and returns a value in [-1.0, 1.0].
     - No clamping, no business rules, just the math.
     """
-    return #score
-
-def calc_compatibility(vec1: Vector, vec2: Vector) -> float:
-
-    return
+    score = cosine_similarity(vec1.reshape(1, -1), vec2.reshape(1, -1))[0][0]
+    return score
 
 def calc_compatibility(user_a_vec: Dict, user_b_vec: Dict) -> float:
     """Calculate and return the compatibility score between two users based on their feature vectors."""
@@ -67,49 +64,64 @@ def calc_compatibility(user_a_vec: Dict, user_b_vec: Dict) -> float:
     - Handles edge cases (NaN, inf, etc.).
     - This is the function routers / services should import.
     """
-    if not user_a_vec or not user_b_vec:
-        return 0.0
+    vec_a = np.array(list(user_a_vec.values()))
+    vec_b = np.array(list(user_b_vec.values()))
 
+    if not _check_user_vector(vec_a) or not _check_user_vector(vec_b):
+        return 0.0
+    
     if user_a_vec == user_b_vec:
         return 1.0
+    
+    score = _score(vec_a, vec_b)
 
-    features = sorted(set(user_a_vec.keys()).union(set(user_b_vec.keys())))
-    vec_a = np.array([user_a_vec.get(f, 0) for f in features]).reshape(1, -1)
-    vec_b = np.array([user_b_vec.get(f, 0) for f in features]).reshape(1, -1)
+    # Edge case: score can be NaN or infinite
+    if np.isnan(score) or np.isinf(score):
+        return 0.0
+    
+    return _normalize_score(score)
 
-    score = cosine_similarity(vec_a, vec_b)[0][0]
-    return score
-
-def compare_users(target: Vector, others: Dict[str, Vector], top_k: int | None = None) -> List[Tuple[str, float]]:
+def compare_users(target: Dict, others: Dict[str, Dict], top_k: int | None = None) -> List[Tuple[str, float]]:
     """
-    Rank other users by compatibility with a target user.
-
-    Parameters
-    ----------
-    target:
-        Feature vector for the "reference" user.
-    others:
-        A mapping of user identifiers (e.g. usernames or IDs)
-        to their feature vectors.
-    top_k:
-        If provided, return only the top_k most compatible users.
-        If None, return all users.
-
-    Returns
-    -------
-    List[Tuple[str, float]]:
-        A list of (user_id, score) pairs, sorted in descending
-        order by score. Example:[('alice', 0.92), ('bob', 0.81), ('carol', 0.47)]
-
-    Requirements:
-    - Call `calc_compatibility(target, vec)` for each entry in `others`.
-    - Collect the results into a list of (key, score) pairs.
-    - Sort that list from highest score to lowest.
-    - If `top_k` is not None, return only the first `top_k` entries.
-
-    TODO:
-        Implement the body and replace the NotImplementedError.
+    Compare a user's score against multiple others and return sorted results.
     """
+    res = []  # List to store (user_id, score) pairs
 
-    return
+    for user_id, vec in others.items():
+        score = calc_compatibility(target, vec)
+        res.append((user_id, score))
 
+    res.sort(key=lambda x: x[1], reverse=True)      # Sort by score descending
+
+    if top_k is not None:                           # Limit to top_k results
+        res = res[:top_k]
+
+    return res
+
+
+def _check_user_vector(vec: Vector) -> bool:
+    """
+    Validate that the input is a proper numeric vector.
+
+    - Checks for correct type (list, np.ndarray).
+    - Ensures no NaN or infinite values.
+    - Ensures non-zero length.
+    """
+    if not isinstance(vec, (list, np.ndarray)):
+        return False
+
+    vec = np.array(vec)
+
+    if vec.size == 0:
+        return False
+
+    if np.isnan(vec).any() or np.isinf(vec).any():
+        return False
+
+    return True
+
+def _normalize_score(raw_score: float) -> float:
+    """
+    Normalize raw score from [-1.0, 1.0] to [0.0, 1.0].
+    """
+    return (raw_score + 1) / 2
