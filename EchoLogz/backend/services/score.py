@@ -1,9 +1,9 @@
 """
-Compatibility Engine (Math-Only module)
+MODULE: Compatibility Engine (Math-Only)
 
 This module is responsible only for vector math. Any raw data
-(e.g., Spotify JSON) will be converted into numeric vectors in
-`feature_vectors.py` before being passed here.
+(ex: Spotify JSON) will be converted into numeric vectors in
+feature_vectors.py before being passed here.
 
 Core Responsibilities:
 - Apply mathematical operations to vectors (ex: cosine similarity, weighted averages)
@@ -11,18 +11,14 @@ Core Responsibilities:
 
 Purpose:
 Acts as the brain of the EchoLogz backend—responsible for interpreting data
-and generating the 'connection scores' that drive recommendations.
+and generating the 'compatibility scores'.
 
-
-"""
-
-"""
 Assignment Goals:
 -----------------
 --- Module = Math only (Feature extraction from Spotify JSON will occur in feature_vectors.py.)
-1. Implement the `_score` function to compute a similarity / 
+1. Implement the '_score' function to compute a similarity / 
    compatibility score between two feature vectors.
-2. Implement `compare_users` to rank 1 or more users by their
+2. Implement 'compare_users' to rank 1 or more users by their
    compatibility with a target user.
 3. Keep this module *web-agnostic*: no FastAPI, no HTTP logic.
    It should be importable and testable as pure Python.

@@ -19,6 +19,7 @@ Usage Example (access from anywhere):
     print(settings.JWT_SECRET)
 """
 
+# EXTERNAL IMPORTS:
 # from pydantic import BaseSettings # Pydantic: Library for data validation / settings management
 from pydantic_settings import BaseSettings, SettingsConfigDict # Pydantic v.2
 

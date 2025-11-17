@@ -17,7 +17,7 @@ INTRO FUNCTIONS:
 - POST /auth/login
 - GET  /auth/me
 
-Modules importing r_auth.py:
+Modules using r_auth.py:
 - main.py
 
 INTERNAL IMPORTS
@@ -68,6 +68,12 @@ EXTERNAL IMPORTS
 
 """
 
+# INTERNAL MODULES:
+from backend.core.config import settings
+from backend.core.dependencies import get_db
+from backend.echoDB.db_validation import UserCreate, UserOut, TokenOut
+from backend.echoDB import db_crud
+
 # EXTERNAL MODULES: 
 from datetime import datetime, timedelta, timezone
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -75,12 +81,6 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import jwt, JWTError
 from passlib.context import CryptContext
 from sqlalchemy.orm import Session
-
-# INTERNAL MODULES:
-from backend.core.config import settings
-from backend.core.dependencies import get_db
-from backend.echoDB.db_validation import UserCreate, UserOut, TokenOut
-from backend.echoDB import db_crud
 
 
 router = APIRouter(prefix="/auth", tags=["auth"])                 
@@ -134,7 +134,7 @@ def _decode_subject(token: str) -> str:
     return str(sub)
 
 # ------------------------------------------------------------------
-# Dependencies - FastAPI Depends Functions specific only to r_auth.py
+# Dependencies - FastAPI Depends(...) Functions specific only to r_auth.py
 # ------------------------------------------------------------------
 def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> UserOut:
     """Validates incoming request belongs to authenticated user — then provides that user’s data to the route."""
@@ -154,11 +154,11 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
 # ------------------------------------------------------------------
 # Routes
 # ------------------------------------------------------------------
-# .POST - HTTP endpoint that accepts POST requests: client sending data to server to create / process something.
-# .GET:    "Give me data."
-# .PUT:    "Replace existing thing with new thing."
-# .PATCH:  "Update the part of existing thing."
-# .DELETE: "Remove this thing."
+    # .POST - HTTP endpoint that accepts POST requests: client sending data to server to create / process something.
+    # .GET:    "Give me data."
+    # .PUT:    "Replace existing thing with new thing."
+    # .PATCH:  "Update the part of existing thing."
+    # .DELETE: "Remove this thing."
 
 @router.post("/signup", response_model=UserOut, status_code=201)
 def signup(payload: UserCreate, db: Session = Depends(get_db)):

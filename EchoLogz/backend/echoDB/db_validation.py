@@ -28,6 +28,8 @@ INTERNAL IMPORTS (dependencies):
     - None
 """
 
+# EXTERNAL IMPORTS:
+from datetime import datetime
 from pydantic import BaseModel, EmailStr, ConfigDict
 
 # ---------- Inputs ----------
@@ -60,3 +62,30 @@ class TokenOut(BaseModel):
     token_type: str = "bearer"
 
 
+# --------- SPOTIFY ----------
+class SpotifyAccountBase(BaseModel):
+    spotify_user_id: str
+    scope: str | None = None
+
+
+class SpotifyAccountCreate(SpotifyAccountBase):
+    access_token: str
+    refresh_token: str
+    expires_at: datetime
+
+
+class SpotifyAccountRead(SpotifyAccountBase):
+    id: int
+    user_id: int
+    expires_at: datetime
+    last_synced_at: datetime | None = None
+
+    class Config:
+        orm_mode = True
+
+class SpotifyAccountUpdate(BaseModel):
+    access_token: str | None = None
+    refresh_token: str | None = None
+    expires_at: datetime | None = None
+    scope: str | None = None
+    last_synced_at: datetime | None = None

@@ -13,8 +13,10 @@ it should NOT depend on FastAPI or any web-specific logic (hence removal of get_
 ────────────────────────────────────────────
 """
 
+# INTERNAL IMPORTS:
 from backend.core.config import settings # ... For DATABASE_URL
 
+# EXTERNAL IMPORTS:
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker

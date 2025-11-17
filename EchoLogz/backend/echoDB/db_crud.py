@@ -25,10 +25,16 @@ Typical Usage (from a router or service layer):
         user = db_crud.get_user_by_id(db, user_id=1)
         return user
 """
-
+# INTERNAL IMPORTS:
 from backend.echoDB import db_schemas, db_validation as db_val
-from sqlalchemy.orm import Session
 
+# EXTERNAL IMPORTS: 
+from sqlalchemy.orm import Session
+from datetime import datetime
+
+# ====================================================================================
+#          EchoLogz CRUD
+# ====================================================================================
 def create_user_with_hash(db: Session, username: str, email: str | None, hashed_pw: str) -> db_schemas.User:
     """ Create a new user w/ username, email and pre-hashed password --> DB and returns saved User object."""
     user = db_schemas.User(        # ... Create new ORM object = 1 row in users table 
@@ -73,3 +79,51 @@ def delete_user(db: Session, user_id: int) -> bool:
     db.delete(user)
     db.commit()
     return True
+
+
+# ====================================================================================
+#          Spotify CRUD
+# ====================================================================================
+
+def get_spotify_account_by_user_id(
+    db: Session,
+    user_id: int,
+) -> db_schemas.SpotifyAccount | None:
+    return (
+        db.query(db_schemas.SpotifyAccount)
+        .filter(db_schemas.SpotifyAccount.user_id == user_id)
+        .first()
+    )
+
+
+def create_or_update_spotify_account(
+    db: Session,
+    user_id: int,
+    spotify_user_id: str,
+    access_token: str,
+    refresh_token: str,
+    expires_at: datetime,
+    scope: str | None = None,
+) -> db_schemas.SpotifyAccount:
+    account = get_spotify_account_by_user_id(db, user_id=user_id)
+
+    if account is None:
+        account = db_schemas.SpotifyAccount(
+            user_id=user_id,
+            spotify_user_id=spotify_user_id,
+            access_token=access_token,
+            refresh_token=refresh_token,
+            expires_at=expires_at,
+            scope=scope,
+        )
+        db.add(account)
+    else:
+        account.spotify_user_id = spotify_user_id
+        account.access_token = access_token
+        account.refresh_token = refresh_token
+        account.expires_at = expires_at
+        account.scope = scope
+
+    db.commit()
+    db.refresh(account)
+    return account
