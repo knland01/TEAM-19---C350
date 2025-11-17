@@ -19,14 +19,14 @@ What this function must do:
         - If expired, use the refresh token to obtain a new access token.
         - Update the SpotifyAccount row with the new token + new expiration.
 
-    4. Get a set of Spotify tracks linked to that user
+    4. Get a set of Spotify tracks linked to that user (function in spot_calls.py)
         Examples:
             Top N tracks from Spotify (short/medium/long term, based on sample)
             Or: tracks they've saved/liked and EchoLogz has stored as track IDs
         NOTE: you're storing track IDs/URIs, not raw audio or giant
         metadata blobs.
 
-    5. Fetch audio features for those tracks
+    5. Fetch audio features for those tracks (function in spot_calls.py)
         - Use Spotify's /audio-features endpoint for the batch of track IDs to get
           things like: danceability, energy, valence, tempo, loudness, acousticness, 
                        instrumentalness, liveness, speechiness
@@ -42,7 +42,9 @@ What this function must do:
     7. Return the taste vector:
         - Return the vector to the caller (match engine, compatibility scorer, etc.).
         - Do NOT store unnecessary raw Spotify metadata.
-        - Store the derived vector (this is Spotify-compliant).
+        - 
+    8. Store the derived vector (this is Spotify-compliant):
+        - DESIGN CHOICE: Always recompute? or store vectors... (?) hmmmmmm....
 
 IMPORTANT NOTE:
     - Never log tokens or Spotify user IDs in plain text.
@@ -50,6 +52,11 @@ IMPORTANT NOTE:
     - This function must only return derived numeric features, never raw Spotify content.
 """
 
+# INTERNAL IMPORTS:
+from . import spot_calls
+from backend.echoDB import db_crud
+
+# EXTERNAL IMPORTS:
 from sqlalchemy.orm import Session
 
 

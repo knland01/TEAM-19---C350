@@ -29,10 +29,18 @@ import requests
 
 BASE_URL = "https://api.spotify.com/v1"
 
-def get_user_profile(access_token: str):
-    headers = {"Authorization": f"Bearer {access_token}"}
-    response = requests.get(f"{BASE_URL}/me", headers=headers)
-    if response.status_code == 200:
-        return response.json()
-    else:
-        return {"error": response.json()}
+def _auth_headers(access_token: str) -> dict:
+    return {"Authorization": f"Bearer {access_token}"}
+
+def get_user_profile(access_token: str) -> dict:
+    resp = requests.get(f"{BASE_URL}/me", headers=_auth_headers(access_token))
+    resp.raise_for_status()
+    return resp.json()
+
+def get_user_top_tracks():
+    ...
+    return
+
+def get_audio_features():
+    ...
+    return
