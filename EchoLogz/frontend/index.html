@@ -14,6 +14,7 @@
   </head>
   <body>
     <div id="root"></div>
+    <script type="text/babel" src="js/navbar.jsx"></script>
     <script type="text/babel">
       const {useState} = React;
 
@@ -55,36 +56,6 @@
         function submitPlaylist(){
           if(!playlistUrl){ alert('[Submit Playlist Placeholder]'); return; }
           setJoined(true);
-        }
-
-        function Navbar({signedIn=false, username=''}) {
-          return (
-            <nav className="navbar">
-              <div className="navbar-left">
-                <header className="site-brand">
-                  <div className="logo">EL</div>
-                  <div>
-                    <h1>EchoLogz</h1>
-                    <p className="lead">SNAPPY TAGLINE HERE</p>
-                  </div>
-                </header>
-              </div>
-              <div className="navbar-right">
-                {signedIn ? (
-                  <>
-                    <a href="#" className="nav-link">Account</a>
-                    <a href="#" className="nav-link">Saved</a>
-                    <span className="nav-user">{username}</span>
-                  </>
-                ) : (
-                  <>
-                    <a href="#" className="nav-link">Sign In</a>
-                    <a href="#" className="nav-link signup">Sign Up</a>
-                  </>
-                )}
-              </div>
-            </nav>
-          );
         }
 
         return (

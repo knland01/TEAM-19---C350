@@ -12,9 +12,11 @@
 
     <!-- Don't use this in production: -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="js/utils.js"></script>
   </head>
   <body>
     <div id="root"></div>
+    <script type="text/babel" src="js/navbar.jsx"></script>
     <script type="text/babel">
       const {useState} = React;
 
@@ -27,15 +29,6 @@
         const [loading, setLoading] = useState(false);
         const [errors, setErrors] = useState({});
 
-        function validateEmail(email) {
-          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-          return emailRegex.test(email);
-        }
-
-        function validatePassword(password) {
-          return password.length >= 8;
-        }
-
         function handleSignUpSubmit() {
           setErrors({});
           const newErrors = {};
@@ -47,7 +40,7 @@
           else if (!validatePassword(password)) newErrors.password = 'Password must be at least 8 characters';
 
           if (!confirmPassword) newErrors.confirmPassword = 'Please confirm your password';
-          else if (password !== confirmPassword) newErrors.confirmPassword = 'Passwords do not match';
+          else if (!passwordsMatch(password, confirmPassword)) newErrors.confirmPassword = 'Passwords do not match';
 
           if (Object.keys(newErrors).length > 0) {
             setErrors(newErrors);
@@ -79,26 +72,6 @@
             setLoading(false);
             window.location.href = 'index.html';
           }, 1200);
-        }
-
-        function Navbar() {
-          return (
-            <nav className="navbar">
-              <div className="navbar-left">
-                <header className="site-brand">
-                  <div className="logo">EL</div>
-                  <div>
-                    <h1>EchoLogz</h1>
-                    <p className="lead">SNAPPY TAGLINE HERE</p>
-                  </div>
-                </header>
-              </div>
-              <div className="navbar-right">
-                <a href="sign_in.html" className="nav-link">Sign In</a>
-                <a href="sign_up.html" className="nav-link signup">Sign Up</a>
-              </div>
-            </nav>
-          );
         }
 
         function StepIndicator() {
