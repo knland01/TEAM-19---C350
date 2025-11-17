@@ -20,24 +20,29 @@ Access the running server at:
             http://127.0.0.1:8000/
 
 """
-import sys, os
 
+
+
+
+# import sys, os
 from starlette.staticfiles import StaticFiles
 
-from backend.echoDB import db_tables
+# sys.path.insert(0, os.path.abspath(os.path.dirname(__file__) + "/../.."))
 
-sys.path.insert(0, os.path.abspath(os.path.dirname(__file__) + "/../.."))
+# INTERNAL IMPORTS:
+from backend.echoDB import db_tables
+from backend.routers import r_auth, r_spot_auth, r_match, r_users
+from backend.echoDB import db_session
+from backend.core.config import settings # Load (.env) variables via config.py
+from contextlib import asynccontextmanager
+
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware 
 # ... CORS: Allows communication btwn diff ports (frontend -> backend) - which is only issue during dev
 # ... FRONT-END (DEV): 127.0.0.1:5500 --> BACK-END (DEV): 127.0.0.1:8000
 # ... FRONT-END (DEPLOY): https://echologz(or whatever).com --> BACK-END (DEPLOY): https://echologz(or whatever)/api.com
-from backend.routers import r_auth, r_spot_auth, r_status, r_match
-from backend.echoDB import db_session
-from backend.core.config import settings # Load (.env) variables via config.py
-from backend.routers import r_users
-from contextlib import asynccontextmanager
+
 
 # Create the FastAPI app instance
 app = FastAPI(title="EchoLogz API")
@@ -48,7 +53,7 @@ app.add_middleware(
     allow_origins=[ # ALLOW FRONT-END ---> HTTP REQUESTS ---> BACK-END: 127.0.0.1:8000
         "http://127.0.0.1:5500", "http://localhost:5500",
         "http://127.0.0.1:3000", "http://localhost:3000",
-        "https://echoquest.app"  # your production frontend
+        "https://echoquest.app"  # production frontend
     ],
     allow_credentials=True,
     allow_methods=["*"],  # or ["GET", "POST"] if you want to limit

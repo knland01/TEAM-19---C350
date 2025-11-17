@@ -33,8 +33,8 @@ Connected Modules (indirectly)
 Typical Usage: SEE r_auth.get_current_user
 """
 # INTERNAL IMPORTS:
-from EchoLogz.backend.echoDB import db_tables
-from EchoLogz.backend.echoDB import db_schemas as db_val
+from backend.echoDB import db_tables
+from backend.echoDB import db_schemas as db_val
 
 # EXTERNAL IMPORTS: 
 from sqlalchemy.orm import Session
