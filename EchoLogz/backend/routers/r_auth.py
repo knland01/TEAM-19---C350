@@ -133,9 +133,9 @@ def _decode_subject(token: str) -> str:
         raise JWTError("missing sub")
     return str(sub)
 
-# ------------------------------------------------------------------
+# -------------------------------------------------------------------------
 # Dependencies - FastAPI Depends(...) Functions specific only to r_auth.py
-# ------------------------------------------------------------------
+# -------------------------------------------------------------------------
 def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> UserOut:
     """Validates incoming request belongs to authenticated user — then provides that user’s data to the route."""
     try:
