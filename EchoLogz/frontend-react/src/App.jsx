@@ -1,21 +1,62 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
-import Navbar from './components/navbar';
+import { useState } from 'react';
+import { Routes, Route} from 'react-router-dom';
+import SignUp from './pages/SignUp';
+import Navbar from './components/Navbar';
+import './App.css';
+import Index from "./pages/Index.jsx";
 
-function App() {
-  const [count, setCount] = useState(0)
-
-  return (
-    <>
-      <Navbar />
-      <div>
-        <h1>Welcome to EchoLogz</h1>
-        <p>Your new React front-end is running.</p>
-      </div>
-    </>
-  );
+function Placeholder({ label }) {
+    return <div style={{ opacity: 0.9 }} className="muted">{label}</div>;
 }
 
-export default App;
+function EchoLogzMockup() {
+    const [sessionCode, setSessionCode] = useState('');
+    const [playlistUrl, setPlaylistUrl] = useState('');
+    const [joined, setJoined] = useState(false);
+    const [oauthConnected, setOauthConnected] = useState(false);
+    const [signedIn, setSignedIn] = useState(false);
+    const username = "Duncan";
+
+    const compatibility = 78;
+    const mockIdentityA = { name:'You', features:[ 'Indie', 'Acoustic', 'Low Energy', 'Warm Keys' ]};
+    const mockIdentityB = { name:'Match', features:['Alt Rock','High Energy','Electronic','Danceable']};
+
+    function createSession(){
+        // Generate a code and store it in state so JSX can read it.
+        const code = Math.random().toString(36).slice(2,8).toUpperCase();
+        setSessionCode(code);
+    }
+
+    function joinSession(){
+        if(!sessionCode){ alert('Create or enter a session code first.'); return; }
+        setJoined(true);
+    }
+
+    function connectSpotify(){
+        // window.location.href="/auth/spotify/login"; <-- removed from original
+        setOauthConnected(true);
+        alert('[Spotify OAuth Placeholder]');
+    }
+
+    function submitPlaylist(){
+        if(!playlistUrl){ alert('[Submit Playlist Placeholder]'); return; }
+        setJoined(true);
+    }
+
+    return (
+        <div className="app-container">
+            <Navbar signedIn={signedIn} username={username} />
+            {/* ...rest of your JSX... */}
+            {/* Keep all JSX from your EchoLogzMockup here */}
+        </div>
+    );
+}
+
+export default function App() {
+    return <>
+        <Routes>
+            <Route path="/" element={<Index/>} />
+            <Route path="/sign_up" element={<SignUp/>} />
+        </Routes>
+    </>;
+}
