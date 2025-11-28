@@ -1,24 +1,31 @@
 TEAM-19 README:
 
 
-Starting the backend:
-from /EchoLogz:
+STARTING THE BACKEND:
+
+Run from -->  /EchoLogz:
 ```
 uvicorn backend.main:app --reload
 ```
 
+----------------------------
 
-Run from: /EchoLogz/frontend-react:
+STARTING THE FRONTEND:
+
+Run from -- > /EchoLogz/frontend-react:
 ```
 npm install
 
 npm run dev
 ```
+
 ----------------------------
 
 
-(DEPRECATEAD - mock-up folder only)
+(DEPRECATEAD: mock-up folder only)
+
 Starting the frontend: 
+
 from /EchoLogz/frontend:
 ```
 pnpm i    <--- Deprecated >
