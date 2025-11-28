@@ -5,7 +5,7 @@ TEAM-19 README:
 STARTING THE BACKEND:
 
 Run from -->  /EchoLogz:
-```
+```bash
 uvicorn backend.main:app --reload
 ```
 
@@ -15,9 +15,12 @@ STARTING THE FRONTEND:
 
 Run from -- > /EchoLogz/frontend-react:
 ```
-npm install
+> **Requires pnpm installed globally (outside your echologz environment):**
+> `npm install -g pnpm`
 
-npm run dev
+```bash
+pnpm install
+pnpm run dev
 ```
 
 ----------------------------
