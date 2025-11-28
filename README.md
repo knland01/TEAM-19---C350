@@ -32,7 +32,7 @@ Starting the frontend:
 
 from /EchoLogz/frontend:
 ```
-pnpm i    <--- Deprecated >
+pnpm i
 
-pnpm dev  <--- Deprecated >
+pnpm dev
 ```
