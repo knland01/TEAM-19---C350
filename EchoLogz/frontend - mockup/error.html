@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Error - EchoLogz</title>
+
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="pw-style.css"/>
+
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+
+    <!-- Don't use this in production: -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="text/babel" src="js/navbar.jsx"></script>
+    <script type="text/babel">
+
+      function ErrorPage() {
+
+        function BackButton() {
+
+            function goBack() {
+                window.history.back();
+            }
+            return (
+            <button className="back-button" onClick={goBack}>
+            Go Back
+            </button>
+            );
+        }
+
+        function ErrorPageContents() {
+          return (
+            <div className="reset-form">
+              <h2>Error ___</h2>
+
+              <p>Sorry :(</p>
+                <p>Error Message</p>
+                <BackButton />
+            </div>
+          );
+        }
+
+
+        return (
+          <div className="app-container">
+            <Navbar />
+            <div className="reset-container">
+              <div className="reset-panel panel">
+                <ErrorPageContents />
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      const root = ReactDOM.createRoot(document.getElementById('root'));
+      root.render(<ErrorPage />);
+    </script>
+  </body>
+</html>
