@@ -15,6 +15,7 @@ NOTE: CORSMiddleware
 # ... FRONT-END (DEPLOY): https://echologz(or whatever).com --> BACK-END (DEPLOY): https://echologz(or whatever)/api.com
 
 Run with Terminal Command:
+            (Navigate to: EchoLogz)
             uvicorn backend.main:app --reload
 
 Access the running server at: 

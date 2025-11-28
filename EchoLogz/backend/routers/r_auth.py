@@ -5,7 +5,8 @@ MODULE: EchoLogz Auth Router (r_auth.py)
 
 Responsibilities:
 Handles all authentication endpoints for the EchoLogz backend. 
-Provides login, token generation, and user verification using a database-backed (persistent data, not temporary) user store. 
+Provides login, token generation, and user verification using a database-backed 
+(persistent data, not temporary) user store. 
 Uses JWT for stateless authentication (no server-side session storage). 
 All request/response schemas come from backend.echoDB.db_schemas.
 All database access is handled through SQLAlchemy sessions and CRUD utilities.

@@ -88,7 +88,7 @@ def post_compare(req: CompareReq, db: Session = Depends(get_db)):
             user_id=req.user_b_id,
             sample=req.sample,
         )
-        score = calc_compatibility(user_a_vec, user_b_vec) # Compute compatibility using the math-only engine.
+        score = calc_compatibility(user_a_vec, user_b_vec) # Compute compatibility 
         pair_id = None # look up / store a pair_id (?)
         return CompareResp(score=score, pair_id=pair_id)
     except ValueError as e: # bad-input - features or math
