@@ -13,9 +13,9 @@ uvicorn backend.main:app --reload
 
 STARTING THE FRONTEND:
 
-Run from -- > ./EchoLogz/frontend-react: 
+Run from -- > ./EchoLogz/frontend-react/: 
 
-> **Requires pnpm installed globally (outside your echologz environment):**
+> **Requires pnpm installed globally (outside your echologz env):**
 > `npm install -g pnpm`
 
 
