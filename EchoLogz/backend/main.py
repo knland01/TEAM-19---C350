@@ -15,12 +15,12 @@ NOTE: CORSMiddleware
 # ... FRONT-END (DEPLOY): https://echologz(or whatever).com --> BACK-END (DEPLOY): https://echologz(or whatever)/api.com
 
 Run with Terminal Command:
-            (Navigate to: EchoLogz)
+            (Navigate to: EchoLogz/)
             uvicorn backend.main:app --reload
 
 Access the running server at: 
             http://127.0.0.1:8000/
-            http://127.0.0.1:8000/docs <-- Swagger UI (FastAPI Interactive API Documentation)
+            http://127.0.0.1:8000/docs <-- Swagger UI (FastAPI Interactive - API Documentation)
 
 """
 
@@ -40,7 +40,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.staticfiles import StaticFiles
 #----------------------------------------------------------------------------------------------
 
-# CREATE ALL DB TABLES IF THEY DON'T ALREADY EXIST IN ECHOLOGZ.DB
+# CREATE ALL DB TABLES IF THEY DON'T ALREADY EXIST IN: backend/data/echologz.db
 @asynccontextmanager
 async def lifespan(app: FastAPI): # Runs when the app starts
     db_tables.Base.metadata.create_all(bind=db_session.engine)
