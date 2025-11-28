@@ -51,7 +51,7 @@ EXTERNAL IMPORTS (parts have been moved to security.py)
     
     -- [FASTAPI.SECURITY]:       FASTAPI SECURITY HELPER UTILITIES for LOGIN / AUTH STUFF
     # OAuth2PasswordBearer:      - extracts bearer token from Authorization header of requests 
-    # OAuth2PasswordRequestForm: - parses username/password form data for login
+    # OAuth2PasswordRequestForm: - parses email/password form data for login
 
     NOTE: A "bearer token" is any token where possession alone grants access (it's not a specific format).
 
@@ -99,16 +99,15 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 @router.post("/signup", response_model=UserOut, status_code=201)
 def signup(payload: UserCreate, db: Session = Depends(get_db)):
     """Creates a new user account.
-        - validates request body, check username exists, hashes pw, inserts user -> DB
+        - validates request body, check email exists, hashes pw, inserts user -> DB
         Returns: user info sans pw (UserOut shaped)
     """
-    if db_crud.get_user_by_username(db, payload.username):
-        raise HTTPException(status_code=400, detail="Username is taken")
+    if db_crud.get_user_by_email(db, payload.email):
+        raise HTTPException(status_code=400, detail="email is taken")
     hashed = security._hash_password(payload.password)
     user = db_crud.create_user_with_hash(
         db=db,
-        username=payload.username,
-        email=getattr(payload, "email", None),
+        email=payload.email,
         hashed_pw=hashed,
     )
     return UserOut.model_validate(user)
@@ -116,13 +115,13 @@ def signup(payload: UserCreate, db: Session = Depends(get_db)):
 @router.post("/login", response_model=TokenOut)
 def login(form: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     """Authenticates a user and returns an access token.
-    - validates username + password against DB, raises 401 for bad credentials, generates a JWT access token (sub = username)
+    - validates email + password against DB, raises 401 for bad credentials, generates a JWT access token (sub = email)
     Returns: token shaped as TokenOut.
     """
-    user = db_crud.get_user_by_username(db, form.username)
+    user = db_crud.get_user_by_email(db, form.email)
     if not user or not security._verify_password(form.password, user.hashed_password):
         raise HTTPException(status_code=401, detail="Bad credentials")
-    token = security._create_access_token(sub=user.username)
+    token = security._create_access_token(sub=user.email)
     return TokenOut(access_token=token)
 
 @router.get("/me", response_model=UserOut)

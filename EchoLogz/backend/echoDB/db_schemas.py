@@ -36,25 +36,25 @@ INTERNAL IMPORTS (dependencies):
 from datetime import datetime
 from pydantic import BaseModel, EmailStr, ConfigDict
 
+
 # ---------- Inputs ----------
 class UserCreate(BaseModel):
     """Validates incoming JSON when the user is being created."""
-    username: str
+    email: EmailStr
     password: str
-    email: EmailStr | None = None # optional value; default=None
+    # username: str | None = None
 
 class UserUpdate(BaseModel):
     """Validates schema for updating user accounts."""
-    username: str | None = None
-    password: str | None = None
     email: EmailStr | None = None 
-
+    password: str | None = None
+    # username: str | None = None
 # ---------- Outputs ----------
 class UserOut(BaseModel):
     """Validates / shapes user DB data API sends back to the client."""
     id: int
-    username: str
-    email: EmailStr | None = None
+    email: EmailStr
+    # username: str
     model_config = ConfigDict(from_attributes=True) # ORM objects don't use dicts.
     # pydantic v2 syntax
     # Pydantic model can receive objects with attributes (like SQLAlchemy ORM models) -> read their data 

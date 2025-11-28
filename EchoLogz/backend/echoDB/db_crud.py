@@ -35,6 +35,7 @@ Typical Usage: SEE r_auth.get_current_user
 # INTERNAL IMPORTS:
 from backend.echoDB import db_tables
 from backend.echoDB import db_schemas as db_val
+from backend.core import security
 
 # EXTERNAL IMPORTS: 
 from sqlalchemy.orm import Session
@@ -43,10 +44,9 @@ from datetime import datetime
 # ====================================================================================
 #          EchoLogz CRUD
 # ====================================================================================
-def create_user_with_hash(db: Session, username: str, email: str | None, hashed_pw: str) -> db_tables.User:
-    """ Create a new user w/ username, email and pre-hashed password --> DB and returns saved User object."""
+def create_user_with_hash(db: Session, email: str, hashed_pw: str) -> db_tables.User:
+    """ Create a new user w/ email and pre-hashed password --> DB and returns saved User object."""
     user = db_tables.User(        # ... Create new ORM object = 1 row in users table 
-        username=username,
         email=email,
         hashed_password=hashed_pw,
     )
@@ -56,9 +56,9 @@ def create_user_with_hash(db: Session, username: str, email: str | None, hashed_
     db.refresh(user)               # Python object doesn't yet know DB added info (like ID idx) until refresh
     return user                    # Return the User object to have your way with it however you please.
 
-def get_user_by_username(db: Session, username: str) -> db_tables.User | None:
-    """Look up user by username and return User object or None."""
-    return db.query(db_tables.User).filter(db_tables.User.username == username).first()
+def get_user_by_email(db: Session, email: str) -> db_tables.User | None:
+    """Look up user by email and return User object or None."""
+    return db.query(db_tables.User).filter(db_tables.User.email == email).first()
 
 def get_user_by_id(db: Session, user_id: int) -> db_tables.User | None:
     """Look up user by ID and return User object or None."""
@@ -73,7 +73,22 @@ def update_user(db: Session, user_id: int, payload: db_val.UserUpdate) -> db_tab
     user = db.query(db_tables.User).filter(db_tables.User.id == user_id).first()
     if not user:
         return None
-    for field, value in payload.dict(exclude_unset=True).items():
+    data = payload.model_dump(exclude_unset=True)
+
+    # --- Special handling for password updates ----------------------------------------------------
+    if "password" in data:
+        raw_pw = data["password"]
+        # Detect plaintext
+        if not raw_pw.startswith("$2"):
+            raw_pw = security._hash_password(raw_pw)
+
+        # Store into correct column
+        data["hashed_password"] = raw_pw
+        del data["password"]
+    # ---------------------------------------------------------------------------------------------
+
+    # --- Apply all valid updates ---
+    for field, value in data.items():
         setattr(user, field, value)
     db.commit()
     db.refresh(user)

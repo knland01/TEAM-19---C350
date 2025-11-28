@@ -57,6 +57,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")      # extracts Bea
 # ------------------------------------------------------------------
 def _hash_password(plain: str) -> str:
     """FOR new user accounts: Hash a plaintext password using the application's password context."""
+    print("DEBUG: password received by hash_password:", repr(plain), "length:", len(plain))
     return pwd_context.hash(plain)
 
 def _verify_password(plain: str, hashed: str) -> bool:
@@ -66,7 +67,7 @@ def _verify_password(plain: str, hashed: str) -> bool:
 def _create_access_token(sub: str, minutes: int | None = None) -> str:
     """Create a signed JWT access token.
     Parameters:
-        sub:      The subject identifier (typically user ID or username).
+        sub:      The subject identifier (typically user ID or email).
         minutes:  Optional custom expiration window. If omitted, uses the
                   default ACCESS_TOKEN_EXPIRE_MIN value.
     Returns: A signed JWT string containing the subject and expiration timestamp.
@@ -81,7 +82,7 @@ def _decode_subject(token: str) -> str:
     """Decode a JWT access token and return the subject ("sub") field.
     Raises: 
         JWTError:  If the token is invalid, expired, or missing the subject.
-    Returns: The subject identifier value as a string (typically user ID or username).
+    Returns: The subject identifier value as a string (typically user ID or email).
     """
     payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
     sub = payload.get("sub")
@@ -96,14 +97,14 @@ def _decode_subject(token: str) -> str:
 def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> UserOut:
     """Validates incoming request belongs to authenticated user — then provides that user's data to the route."""
     try:
-        username = _decode_subject(token)
+        email = _decode_subject(token)
     except JWTError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid or expired token",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    user = db_crud.get_user_by_username(db, username)
+    user = db_crud.get_user_by_email(db, email)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return UserOut.model_validate(user)

@@ -28,9 +28,9 @@ Access the running server at:
 # sys.path.insert(0, os.path.abspath(os.path.dirname(__file__) + "/../.."))
 
 # INTERNAL IMPORTS:
-from backend.echoDB import db_tables
+from backend.echoDB import db_session, db_tables
+from backend.echoDB.db_health import assert_schema_matches
 from backend.routers import r_auth, r_spot_auth, r_match, r_users
-from backend.echoDB import db_session
 # from backend.core.config import settings # Load (.env) variables via config.py
 
 # EXTERNAL IMPORTS
@@ -43,7 +43,10 @@ from starlette.staticfiles import StaticFiles
 # CREATE ALL DB TABLES IF THEY DON'T ALREADY EXIST IN: backend/data/echologz.db
 @asynccontextmanager
 async def lifespan(app: FastAPI): # Runs when the app starts
+    print("LIFESPAN START: creating tables")
+    print("Tables in metadata:", db_tables.Base.metadata.tables.keys())
     db_tables.Base.metadata.create_all(bind=db_session.engine)
+    assert_schema_matches() # Run schema check
     yield # Runs when the app stops (if you need cleanup)
 
 
@@ -57,6 +60,7 @@ app.add_middleware(
     allow_origins=[ # ALLOW FRONT-END ---> HTTP REQUESTS ---> BACK-END: 127.0.0.1:8000
         "http://127.0.0.1:5500", "http://localhost:5500",
         "http://127.0.0.1:3000", "http://localhost:3000",
+        "http://127.0.0.1:5173", "http://localhost:5173", # Vite assumes 5173
         "https://echoquest.app"  # production frontend
     ],
     allow_credentials=True,
