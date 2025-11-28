@@ -1,4 +1,4 @@
-function Navbar({signedIn=false, username='', active=''}) {
+export default function Navbar({signedIn=false, username='', active=''}) {
     return (
     <nav className="navbar">
         <div className="navbar-left">
@@ -15,15 +15,15 @@ function Navbar({signedIn=false, username='', active=''}) {
         <div className="navbar-right">
         {signedIn ? (
             <>
-            <a href="index.html" className={`nav-link ${active==="Dashboard"?"active":""}`}>Dashboard</a>
+            <a href="/index" className={`nav-link ${active==="Dashboard"?"active":""}`}>Dashboard</a>
             <a href="history_mockup.html" className={`nav-link ${active==="Saved"?"active":""}`}>Saved</a>
             <a href="account.html" className={`nav-link ${active==="Account"?"active":""}`}>Account</a>
-            <a href="sign_in.html" className="nav-link signup">Sign Out</a>
+            <a href="/sign_in" className="nav-link signup">Sign Out</a>
             </>
         ) : (
             <>
-            <a href="sign_in.html" className="nav-link">Sign In</a>
-            <a href="sign_up.html" className="nav-link signup">Sign Up</a>
+            <a href="/sign_in" className="nav-link">Sign In</a>
+            <a href="/sign_up" className="nav-link signup">Sign Up</a>
             </>
         )}
         </div>
