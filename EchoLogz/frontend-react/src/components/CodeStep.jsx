@@ -2,36 +2,52 @@
 import {useState} from "react";
 import React from "react";
 
-export function CodeStep({ email, errors, loading, onVerifyClick, goBack }) {
+export function CodeStep({ email, verifyExpiresIn, errors, loading, onVerifyClick, goBack, onResendClick }) {
   return (
     <div className="reset-form">
-      <h2>Verify Your Email</h2>
-      <p className="muted">
-        We've sent a verification link to <strong>{email}</strong>.<br />
-        DEV: Clickable link in <strong>TERMINAL</strong> until email system set up proper.<br />
-        After you've clicked the link, press the button below to continue.
-      </p>
+        <h2>Verify Your Email</h2>
+        <p className="muted">
+            We've sent a verification link to <strong>{email}</strong>.<br />
+            DEV: Clickable link in <strong>TERMINAL</strong> until email system set up proper.<br />
+            After you've clicked the link, press the button below to continue.
+        </p>
+        {verifyExpiresIn !== null && (
+            <p className="muted" style={{ marginTop: "4px" }}>
+                The verification link expires in <strong>{verifyExpiresIn} minutes</strong>.
+            </p>
+            )}
+            
+        <button
+            className="btn secondary full-width"
+            style={{ marginTop: "12px" }}
+            onClick={onResendClick}
+            type="button"
+        >
+            Resend verification link
+        </button>
 
-      {/* Error from backend (invalid / expired token, etc.) */}
-      {errors.code && (
-        <div className="error-message">{errors.code}</div>
-      )}
+        {/* Error from backend (invalid / expired token, etc.) */}
+        {errors.code && (
+            <div className="error-message">{errors.code}</div>
+        )}
 
-      <button
-        className="btn primary full-width"
-        onClick={onVerifyClick}
-        disabled={loading}
-      >
-        {loading ? "Verifying..." : "I've verified my email"}
-      </button>
+        <button
+            className="btn primary full-width"
+            onClick={onVerifyClick}
+            disabled={loading}
+        >
+            {loading ? "Verifying..." : "I've verified my email"}
+        </button>
 
-      <button
-        className="btn secondary full-width"
-        onClick={goBack}
-        style={{ marginTop: "12px" }}
-      >
-        Back to Sign Up
-      </button>
+
+
+        <button
+            className="btn secondary full-width"
+            onClick={goBack}
+            style={{ marginTop: "12px" }}
+        >
+            Back to Sign Up
+        </button>
     </div>
   );
 }

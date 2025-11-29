@@ -18,11 +18,13 @@ export default function SignUp() {
     const [signupEmail, setSignupEmail] = useState(""); // email from step 1 → shown in step 2
     const [verifyToken, setVerifyToken] = useState("");  // JWT returned from /signup
     const [codeErrors, setCodeErrors] = useState({}); // errors shown in CodeStep
+    const [verifyExpiresIn, setVerifyExpiresIn] = useState(null); // show expire time to user
 
 
     function handleSignupSuccess({ email, verifyToken, verifyExpiresIn }) {
         setSignupEmail(email);
         setVerifyToken(verifyToken);
+        setVerifyExpiresIn(verifyExpiresIn);
         setCodeErrors({});
         setStep(2);
     }
@@ -66,6 +68,11 @@ export default function SignUp() {
             setLoading(false);
         }
     }
+    function handleResendClick() {
+        setCodeErrors({
+            code: "TODO: Code Assignment (Resend v.link not implemented yet)\n"
+        });
+    }
 
 
     return (
@@ -91,7 +98,9 @@ export default function SignUp() {
                     errors={codeErrors}
                     loading={loading}
                     onVerifyClick={handleVerifyClick}
+                    verifyExpiresIn={verifyExpiresIn}
                     goBack={() => setStep(1)}
+                    onResendClick={handleResendClick}
                 />
                 )}
 
