@@ -1,5 +1,6 @@
 // src/SignUp.jsx
-import { useState } from 'react';
+import { useState } from 'react'; 
+// ... react stores state in variable (ex: step, loading) | changes state with function (ex: setStep, setLoading) 
 import Navbar from '../components/Navbar.jsx';
 // import { validateEmail, validatePassword, passwordsMatch } from '../utils';
 import {StepIndicator} from "../components/StepIndicator.jsx";
@@ -8,8 +9,11 @@ import {CodeStep} from "../components/CodeStep.jsx";
 import '../pw-style.css';
 
 export default function SignUp() {
-    const [step, setStep] = useState(1);     // Step 1: Account info, Step 2: Verification code
-    const [loading, setLoading] = useState(false);
+    
+    const [step, setStep] = useState(1);  
+    // ... setStep useState(1)--> STEP 1: Account info
+    // ... setStep useState(2) ---> STEP 2: Verification code
+    const [loading, setLoading] = useState(false); // loading useState(true) = talking to backend
 
     return (
         <div className="app-container">
@@ -27,7 +31,7 @@ export default function SignUp() {
                             setStep={setStep}
                         />
                     ) : (
-                        <CodeStep />
+                        <CodeStep /> // Verification code
                     )}
                 </div>
             </div>

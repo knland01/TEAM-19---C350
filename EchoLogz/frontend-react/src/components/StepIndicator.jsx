@@ -1,4 +1,6 @@
 // StepIndicator.jsx
+// Visually displays Steps/Completion on signup screen. 
+
 export function StepIndicator({ step }) {
     return (
         <div className="step-indicator">

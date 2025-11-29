@@ -54,6 +54,7 @@ class UserOut(BaseModel):
     """Validates / shapes user DB data API sends back to the client."""
     id: int
     email: EmailStr
+    is_verified: bool
     # username: str
     model_config = ConfigDict(from_attributes=True) # ORM objects don't use dicts.
     # pydantic v2 syntax

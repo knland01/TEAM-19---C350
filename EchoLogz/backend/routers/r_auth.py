@@ -119,8 +119,24 @@ def login(form: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get
     Returns: token shaped as TokenOut.
     """
     user = db_crud.get_user_by_email(db, form.email)
-    if not user or not security._verify_password(form.password, user.hashed_password):
-        raise HTTPException(status_code=401, detail="Bad credentials")
+    # No user account found --> 404
+    if not user:
+        raise HTTPException(
+            status_code=404,
+            detail="No account found for this email. Please sign up."
+        )
+    # Correct email / wrong password --> 401
+    if not security._verify_password(form.password, user.hashed_password):
+        raise HTTPException(
+            status_code=401, 
+            detail="Incorrect password.")
+    # Correct Credentials, but email has not been verified --> 403
+    if not user.is_verified:
+        raise HTTPException(
+            status_code=403,
+            detail="Still need to verify your email before logging in."
+        )
+    # Everything is correct --> JWT granted
     token = security._create_access_token(sub=user.email)
     return TokenOut(access_token=token)
 

@@ -10,22 +10,22 @@ export function AccountStep({loading, setLoading, setStep}) {
     const [createdUser, setCreatedUser] = useState(null); // <- backend-confirmed account
 
 
-    // function handleSignUpSubmit() {
-    async function handleSignUpSubmit(event) {
+    async function handleSignUpSubmit(event) { // async allows function to use await statements
         if (event && event.preventDefault) { // so Enter / click behaves the same
             event.preventDefault(); 
         }
-        setErrors({});
-        const newErrors = {};
+        setErrors({});  // wipe any old errors
+        const newErrors = {}; // create new error object (basket)
 
+        // drop errors into error basket if present...
         if (!email) newErrors.email = 'Email is required';
         else if (!validateEmail(email)) newErrors.email = 'Invalid email address';
         if (!password) newErrors.password = 'Password is required';
         else if (!validatePassword(password)) newErrors.password = 'Password must be at least 8 characters';
-
         if (!confirmPassword) newErrors.confirmPassword = 'Please confirm your password';
         else if (!passwordsMatch(password, confirmPassword)) newErrors.confirmPassword = 'Passwords do not match';
-
+        
+        // empty out the error basket if it has anything in it before moving on...
         if (Object.keys(newErrors).length > 0) {
             setErrors(newErrors);
             return;
@@ -45,7 +45,7 @@ export function AccountStep({loading, setLoading, setStep}) {
                     }),
                 }
             );
-            if (!resp.ok) {
+            if (!resp.ok) {   // only moves on if no errors
                 let msg = "Sign up failed";
                 try{
                     const data = await resp.json();
@@ -58,11 +58,14 @@ export function AccountStep({loading, setLoading, setStep}) {
                 setErrors((prev) => ({...prev, form: msg}));
                 return;
             }
-            // return real data from back-end to confirm sign-up success
+            // Turn back-end HTTP response into real JavaScript object --> to confirm sign-up success
             const user = await resp.json(); // { id, email }
             setCreatedUser(user);
-            // optional: const user = await resp.json();
-            // setStep(2);            // go to next step in your flow
+
+            setStep(2);            
+
+            // setStep(3); 
+
             } catch (err) {
                 console.error("Signup error:", err);
                 setErrors((prev) => ({
@@ -75,11 +78,11 @@ export function AccountStep({loading, setLoading, setStep}) {
         }
 
     return (
-        <div className="reset-form">
+        <div className="reset-form"> 
             <h2>Create Your Account</h2>
 
-            {/* Backend-confirmed bubble */}
-            {createdUser && (
+            {/* Backend-UserAcct made -- confirmation bubble*/}
+            {createdUser && (                                    // React JSX: (&&) If LEFT return RIGHT
                 <div className="success-message">
                     <strong>Account created!</strong>
                     <div>User ID: {createdUser.id}</div>
@@ -159,7 +162,7 @@ export function AccountStep({loading, setLoading, setStep}) {
 }
 
 
-/* -------- CODE GRAVEYARD -----------
+/* ----------------------- CODE GRAVEYARD --------------------------------------------------------------------
         // setLoading(true);
         // // Simulate API call
         // setTimeout(() => {

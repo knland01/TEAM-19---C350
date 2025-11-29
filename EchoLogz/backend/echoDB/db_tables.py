@@ -35,7 +35,7 @@ WORK AROUND: Store Track IDs + URIs (this is ok)
 from backend.echoDB.db_session import Base
 
 # EXTERNAL IMPORTS:
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Boolean
 from sqlalchemy.orm import relationship
 
 
@@ -50,6 +50,7 @@ class User(Base):
     email = Column(String, unique=True, nullable=False)
     hashed_password = Column(String, nullable=False)
 
+    is_verified = Column(Boolean, nullable=False, default=False)
     # Link to SpotifyAccount rows
     spotify_accounts = relationship(
         "SpotifyAccount",

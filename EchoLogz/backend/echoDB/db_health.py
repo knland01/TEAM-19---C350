@@ -6,14 +6,10 @@ expected ORM models. If there is a mismatch, we raise an error with
 clear instructions for teammates on how to fix their local DB.
 """
 
-
 from backend.echoDB import db_session # , db_tables
 
 from typing import Iterable
 from sqlalchemy import inspect
-
-
-
 
 def _get_column_names(table_name: str) -> set[str]:
     """Return the set of column names for a given table in the DB."""
@@ -62,7 +58,7 @@ def assert_schema_matches() -> None:
     # Users table
     _check_table(
         "users",
-        expected_cols=("id", "email", "hashed_password"),
+        expected_cols=("id", "email", "hashed_password", "is_verified"),
         problems=problems,
     )
 
@@ -88,15 +84,15 @@ def assert_schema_matches() -> None:
     bullet_list = "\n".join(f"- {p}" for p in problems)
 
     fix_instructions = (
-        "\n\nEchoLogz DB schema mismatch detected.\n"
+        "\n\n\nMESSAGE FROM ECHOLOGZ MANAGEMENT: \n---EchoLogz DB schema mismatch detected.\n"
         "Problems:\n"
         f"{bullet_list}\n\n"
         "How to fix (for all devs):\n"
-        "  1) Stop the backend server.\n"
+        "  1) Stop the backend server: cntrl + c.\n"
         "  2) Delete your local DB file:\n"
         "       backend/data/echologz.db\n"
-        "  3) Restart the backend (uvicorn) so echologz.db + tables are auto-generated\n"
-        "     from the ORM models.\n" 
+        "  3) Restart the backend (uvicorn) so echologz.db + tables are auto-generated from the ORM models.\n"
+        "       uvicorn backend.main:app --reload\n"         
         "IMPORTANT: Do NOT manually create echologz.db — the backend will generate it automatically."
     )
 
