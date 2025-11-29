@@ -58,15 +58,21 @@ export function AccountStep({loading, setLoading, setStep, onSignupSuccess}) {
                 setErrors((prev) => ({...prev, form: msg}));
                 return;
             }
-            // Turn back-end HTTP response into real JavaScript object --> to confirm sign-up success
-            const user = await resp.json(); // { id, email }
-            setCreatedUser(user);
+            // New response shape:
+            // { user: { id, email, ... },
+            //   verify_token: "...",
+            //   verify_expires_in: 15 }
+            const data = await resp.json();
+            setCreatedUser(data.user);
 
-            // Tell parent what email was used:
-            if (onSignupSuccess){
-                onSignupSuccess(email);
+            if (onSignupSuccess) {
+                onSignupSuccess({
+                email: data.user.email,
+                verifyToken: data.verify_token,
+                verifyExpiresIn: data.verify_expires_in,
+                });
             }
-            
+
             setStep(2);            
 
             // setStep(3); 

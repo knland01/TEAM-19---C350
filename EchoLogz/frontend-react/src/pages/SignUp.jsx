@@ -13,15 +13,13 @@ export default function SignUp() {
     
     const [step, setStep] = useState(1);  
     // ... setStep useState(1)--> STEP 1: Account info
-    // ... setStep useState(2) ---> STEP 2: Verification code
+    // ... setStep useState(2) ---> STEP 2: Verify email
     const [loading, setLoading] = useState(false); // loading useState(true) = talking to backend
     const [signupEmail, setSignupEmail] = useState(""); // email from step 1 → shown in step 2
     const [verifyToken, setVerifyToken] = useState("");  // JWT returned from /signup
     const [codeErrors, setCodeErrors] = useState({}); // errors shown in CodeStep
 
-    // Called by AccountStep when signup + send-code succeeds.
-    // You can already bump step in AccountStep, but having a dedicated
-    // handler here keeps the flow obvious.
+
     function handleSignupSuccess({ email, verifyToken, verifyExpiresIn }) {
         setSignupEmail(email);
         setVerifyToken(verifyToken);
@@ -29,7 +27,7 @@ export default function SignUp() {
         setStep(2);
     }
 
-    // Step 2: verify code
+    // Step 2: verify email using token
     async function handleVerifyClick() {
         if (!verifyToken) {
             setCodeErrors({ code: "Missing verification token. Please sign up again." });
@@ -39,11 +37,9 @@ export default function SignUp() {
         setLoading(true);
         setCodeErrors({});
         try {
-            const resp = await fetch("http://localhost:8000/auth/verify-email", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ token: verifyToken }),
-            });
+            const resp = await fetch(
+            `http://localhost:8000/auth/verify-email?token=${encodeURIComponent(verifyToken)}`
+            );
 
             if (!resp.ok) {
             const data = await resp.json().catch(() => null);
@@ -84,7 +80,7 @@ export default function SignUp() {
                     email={signupEmail}
                     errors={codeErrors}
                     loading={loading}
-                    handleCodeSubmit={handleVerifyClick}
+                    onVerifyClick={handleVerifyClick}
                     goBack={() => setStep(1)}
                 />
                 )}

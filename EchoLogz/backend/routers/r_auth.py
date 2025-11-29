@@ -77,10 +77,11 @@ from backend.core.dependencies import get_db
 from backend.echoDB.db_schemas import UserCreate, UserOut, TokenOut, SignupOut
 from backend.echoDB import db_crud
 from backend.core import security
+from backend.core.email_client import send_verification_email
 
 
 # EXTERNAL MODULES: 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from jose import JWTError
@@ -98,11 +99,12 @@ router = APIRouter(prefix="/auth", tags=["auth"])
     # .DELETE: "Remove this thing."
 
 @router.post("/signup", response_model=SignupOut, status_code=201)
-def signup(payload: UserCreate, db: Session = Depends(get_db)):
+def signup(payload: UserCreate, background: BackgroundTasks, db: Session = Depends(get_db)):
     """Creates a new user account.
         - validates request body, check email exists, hashes pw, inserts user -> DB
         Returns: user info sans pw (UserOut shaped)
     """
+    # Check duplicate email:
     if db_crud.get_user_by_email(db, payload.email):
         raise HTTPException(status_code=400, detail="email is taken")
     hashed = security._hash_password(payload.password)
@@ -114,18 +116,21 @@ def signup(payload: UserCreate, db: Session = Depends(get_db)):
     # SHORT-LIVED EMAIL V.TOKEN + URL:
     verify_token, expires_in = security.create_email_verify_token(email=user.email)
     verify_url = f"http://localhost:8000/auth/verify-email?token={verify_token}"
+    # Queue async email sending (this does NOT block)
+    background.add_task(send_verification_email, user.email, verify_url)
     print("DEBUG: EMAIL VERIFY LINK -->", verify_url) # Temp --> replace with real email sending service pipeline
     print(f"DEBUG: Verification link expires in {expires_in} minutes.")
     return {
         "user": UserOut.model_validate(user),
+        "verify_token": verify_token,
         "verify_expires_in": expires_in
     }
 
-@router.post("/verify-email")
+@router.get("/verify-email")
 def verify_email(token: str, db: Session = Depends(get_db)):
     try:
         email = security.decode_email_verify_token(token)
-    except JWTError:
+    except Exception:
         raise HTTPException(
             status_code=400,
             detail="Invalid or expired email verification token",

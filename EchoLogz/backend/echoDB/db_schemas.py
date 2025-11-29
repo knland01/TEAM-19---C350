@@ -65,6 +65,7 @@ class UserOut(BaseModel):
 
 class SignupOut(BaseModel):
     user: UserOut
+    verify_token: str
     verify_expires_in: int
 
 class TokenOut(BaseModel):

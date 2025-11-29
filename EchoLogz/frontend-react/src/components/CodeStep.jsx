@@ -7,7 +7,8 @@ export function CodeStep({ email, errors, loading, onVerifyClick, goBack }) {
     <div className="reset-form">
       <h2>Verify Your Email</h2>
       <p className="muted">
-        We've sent a verification link to <strong>{email}</strong>.  
+        We've sent a verification link to <strong>{email}</strong>.<br />
+        DEV: Clickable link in <strong>TERMINAL</strong> until email system set up proper.<br />
         After you've clicked the link, press the button below to continue.
       </p>
 
