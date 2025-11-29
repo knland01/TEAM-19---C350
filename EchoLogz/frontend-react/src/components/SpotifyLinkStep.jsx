@@ -1,44 +1,44 @@
-// src/components/SpotifyLinkStep.jsx
-import React from "react";
+/*// // src/components/SpotifyLinkStep.jsx
+// import React from "react";
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+// const API_BASE_URL =
+//   import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
 
-export function SpotifyLinkStep({ goNext }) {
+// export function SpotifyLinkStep({ goNext }) {
 
-  const handleConnectClick = () => {
-    window.location.href = `${API_BASE_URL}/auth/spotify/login`;
-  };
+//   const handleConnectClick = () => {
+//     window.location.href = `${API_BASE_URL}/auth/spotify/login`;
+//   };
 
-  const handleSkip = () => {
-    goNext();  // Moves to the next step in your SignUp.jsx
-  };
+//   const handleSkip = () => {
+//     goNext();  // Moves to the next step in your SignUp.jsx
+//   };
 
-  return (
-    <div className="reset-form">
-        <h2>Connect Your Spotify Account</h2>
+//   return (
+//     <div className="reset-form">
+//         <h2>Connect Your Spotify Account</h2>
 
-        <p className="muted">
-        You can link your Spotify account now, or skip this and link it later
-        in your EchoLogz dashboard.
-        </p>
+//         <p className="muted">
+//         You can link your Spotify account now, or skip this and link it later
+//         in your EchoLogz dashboard.
+//         </p>
 
-        <button
-            className="btn primary full-width" 
-            onClick={handleConnectClick}
-        >
-            Connect with Spotify
-        </button>
+//         <button
+//             className="btn primary full-width" 
+//             onClick={handleConnectClick}
+//         >
+//             Connect with Spotify
+//         </button>
  
-        <button
-            className="btn-secondary full-width"
-            onClick={handleSkip} style={{ marginTop: "15px" }}
-        >
-            Skip
-        </button>
-    </div>
-  );
-}
+//         <button
+//             className="btn-secondary full-width"
+//             onClick={handleSkip} style={{ marginTop: "15px" }}
+//         >
+//             Skip
+//         </button>
+//     </div>
+//   );
+// }}
 
 
      /* Spotify OAuth Styled Button
