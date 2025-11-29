@@ -14,14 +14,25 @@ NOTE: CORSMiddleware
 # ... FRONT-END (DEV): 127.0.0.1:5500 --> BACK-END (DEV): 127.0.0.1:8000
 # ... FRONT-END (DEPLOY): https://echologz(or whatever).com --> BACK-END (DEPLOY): https://echologz(or whatever)/api.com
 
-Run with Terminal Command:
-            (Navigate to: EchoLogz/)
-            uvicorn backend.main:app --reload
 
-Access the running server at: 
-            http://127.0.0.1:8000/
-            http://127.0.0.1:8000/docs <-- Swagger UI (FastAPI Interactive - API Documentation)
 
+ >>>> ACCESS HELP
+-----------------------------------------------------------------------------------------------------------------------
+BACKEND:
+    Run with Terminal Command:
+                (Navigate to: EchoLogz/)
+                uvicorn backend.main:app --reload
+
+    Access the running server at: 
+                http://127.0.0.1:8000/
+                http://127.0.0.1:8000/docs <-- Swagger UI (FastAPI Interactive - API Documentation)
+-----------------------------------------------------------------------------------------------------------------------
+FRONTEND: 
+    Run with Terminal Command:
+                pnpm run dev
+    Access the running server at: 
+                http://localhost:5173
+-----------------------------------------------------------------------------------------------------------------------
 """
 
 # import sys, os

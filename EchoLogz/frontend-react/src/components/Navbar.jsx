@@ -18,11 +18,11 @@ export default function Navbar({signedIn=false, username='', active=''}) {
             <a href="/index" className={`nav-link ${active==="Dashboard"?"active":""}`}>Dashboard</a>
             <a href="history_mockup.html" className={`nav-link ${active==="Saved"?"active":""}`}>Saved</a>
             <a href="account.html" className={`nav-link ${active==="Account"?"active":""}`}>Account</a>
-            <a href="/sign_in" className="nav-link signup">Sign Out</a>
+            <a href="/sign_in" className="nav-link signup">Log Out</a>
             </>
         ) : (
             <>
-            <a href="/sign_in" className="nav-link">Sign In</a>
+            <a href="/sign_in" className="nav-link">Log In</a>
             <a href="/sign_up" className="nav-link signup">Sign Up</a>
             </>
         )}

@@ -25,7 +25,7 @@ export function AccountStep({loading, setLoading, setStep, onSignupSuccess}) {
         if (!confirmPassword) newErrors.confirmPassword = 'Please confirm your password';
         else if (!passwordsMatch(password, confirmPassword)) newErrors.confirmPassword = 'Passwords do not match';
         
-        // empty out the error basket if it has anything in it before moving on...
+        // dump out the errors
         if (Object.keys(newErrors).length > 0) {
             setErrors(newErrors);
             return;
@@ -58,10 +58,6 @@ export function AccountStep({loading, setLoading, setStep, onSignupSuccess}) {
                 setErrors((prev) => ({...prev, form: msg}));
                 return;
             }
-            // New response shape:
-            // { user: { id, email, ... },
-            //   verify_token: "...",
-            //   verify_expires_in: 15 }
             const data = await resp.json();
             setCreatedUser(data.user);
 
@@ -72,11 +68,6 @@ export function AccountStep({loading, setLoading, setStep, onSignupSuccess}) {
                 verifyExpiresIn: data.verify_expires_in,
                 });
             }
-
-            setStep(2);            
-
-            // setStep(3); 
-
             } catch (err) {
                 console.error("Signup error:", err);
                 setErrors((prev) => ({

@@ -2,7 +2,7 @@
 import {useState} from "react";
 import React from "react";
 
-export function CodeStep({ email, verifyExpiresIn, errors, loading, onVerifyClick, goBack, onResendClick }) {
+export function CodeStep({ email, verifyExpiresIn, errors, loading, onVerifyClick, goBack, onResendClick, verifySuccess, }) {
   return (
     <div className="reset-form">
         <h2>Verify Your Email</h2>
@@ -16,7 +16,7 @@ export function CodeStep({ email, verifyExpiresIn, errors, loading, onVerifyClic
                 The verification link expires in <strong>{verifyExpiresIn} minutes</strong>.
             </p>
             )}
-            
+
         <button
             className="btn secondary full-width"
             style={{ marginTop: "12px" }}
@@ -31,12 +31,20 @@ export function CodeStep({ email, verifyExpiresIn, errors, loading, onVerifyClic
             <div className="error-message">{errors.code}</div>
         )}
 
+        {verifySuccess && !errors.code && (
+            <div className="success-message" style={{ marginTop: "12px" }}>
+            You're all set. You can now Log In to EchoLogz.
+            </div>
+        )}
+
         <button
             className="btn primary full-width"
             onClick={onVerifyClick}
-            disabled={loading}
+            disabled={loading || verifySuccess}
         >
-            {loading ? "Verifying..." : "I've verified my email"}
+            {loading
+                ? "Verifying..." : verifySuccess 
+                ? "Email verified!" : "I've verified my email"}
         </button>
 
 

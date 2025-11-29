@@ -6,7 +6,7 @@ import Navbar from '../components/Navbar.jsx';
 import {StepIndicator} from "../components/StepIndicator.jsx";
 import {AccountStep} from "../components/AccountStep.jsx";
 import {CodeStep} from "../components/CodeStep.jsx";
-import {SpotifyLinkStep} from '../components/SpotifyLinkStep.jsx';
+// import {SpotifyLinkStep} from '../components/SpotifyLinkStep.jsx';
 import '../pw-style.css';
 
 export default function SignUp() {
@@ -19,6 +19,7 @@ export default function SignUp() {
     const [verifyToken, setVerifyToken] = useState("");  // JWT returned from /signup
     const [codeErrors, setCodeErrors] = useState({}); // errors shown in CodeStep
     const [verifyExpiresIn, setVerifyExpiresIn] = useState(null); // show expire time to user
+    const [verifySuccess, setVerifySuccess] = useState(false);
 
 
     function handleSignupSuccess({ email, verifyToken, verifyExpiresIn }) {
@@ -26,6 +27,7 @@ export default function SignUp() {
         setVerifyToken(verifyToken);
         setVerifyExpiresIn(verifyExpiresIn);
         setCodeErrors({});
+        setVerifySuccess(false);
         setStep(2);
     }
 
@@ -38,6 +40,7 @@ export default function SignUp() {
 
         setLoading(true);
         setCodeErrors({});
+        setVerifySuccess(false);
         try {
             const resp = await fetch(`http://localhost:8000/auth/verify-status?email=${encodeURIComponent(signupEmail)}`);
 
@@ -59,8 +62,10 @@ export default function SignUp() {
                 });
                 return;
             }
-                // Email is verified in DB → move to Spotify step
-            setStep(3);
+            setVerifySuccess(true);
+            // TODO: REDIRECT TO LOGIN PAGE HERE
+                
+            // setStep(3); // STEP 3 ---> moved to dashboard
         } catch (err) {
             console.error("Verify error:", err);
             setCodeErrors({ code: "Network error. Please try again." });
@@ -70,7 +75,7 @@ export default function SignUp() {
     }
     function handleResendClick() {
         setCodeErrors({
-            code: "TODO: Code Assignment (Resend v.link not implemented yet)\n"
+            code: "TODO: Code Assignment (Resend v.link not implemented yet)"
         });
     }
 
@@ -99,17 +104,18 @@ export default function SignUp() {
                     loading={loading}
                     onVerifyClick={handleVerifyClick}
                     verifyExpiresIn={verifyExpiresIn}
+                    verifySuccess={verifySuccess}
                     goBack={() => setStep(1)}
                     onResendClick={handleResendClick}
                 />
                 )}
 
-                {step === 3 && (
+                {/* {step === 3 && ( // KL: Spotify link needs to happen AFTER Echologz user is fully logged in for simplicity
                 <SpotifyLinkStep
                     loading={loading}
                     setLoading={setLoading}
                 />
-                )}
+                )} */}
             </div>
         </div>
     </div>

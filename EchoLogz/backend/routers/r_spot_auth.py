@@ -12,7 +12,7 @@ Handles the OAuth dance with Spotify:
 Secure storage notes:
 - Never return raw Spotify tokens to the client.
 - Encrypt/secure tokens at rest - store refresh_token to renew access.
-- Tie Spotify tokens to the EchoLogz user (foreign key to your users table).
+- Tie Spotify tokens to the EchoLogz user (foreign key to the users table).
 ────────────────────────────────────────────
 Modules using r_auth.py:
 - main.py (only)

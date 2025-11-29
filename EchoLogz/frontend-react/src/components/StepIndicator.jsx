@@ -16,12 +16,12 @@ export function StepIndicator({ step }) {
                 <div className="step-label">Verify</div>
             </div>
 
-            <div className="step-line"></div>
-            
+            {/* <div className="step-line"></div>
+
             <div className={`step ${step >= 3 ? 'active' : ''} ${step > 3 ? 'completed' : ''}`}>
                 <div className="step-number">3</div>
                 <div className="step-label">Spotify</div>
-            </div>
+            </div> */}
         </div>
     );
 }
