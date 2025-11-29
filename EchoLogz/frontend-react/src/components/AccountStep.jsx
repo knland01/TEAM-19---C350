@@ -1,7 +1,7 @@
 import {useState} from "react";
 import {passwordsMatch, validateEmail, validatePassword} from "../utils.js";
 
-export function AccountStep({loading, setLoading, setStep}) {
+export function AccountStep({loading, setLoading, setStep, onSignupSuccess}) {
     // const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -62,6 +62,11 @@ export function AccountStep({loading, setLoading, setStep}) {
             const user = await resp.json(); // { id, email }
             setCreatedUser(user);
 
+            // Tell parent what email was used:
+            if (onSignupSuccess){
+                onSignupSuccess(email);
+            }
+            
             setStep(2);            
 
             // setStep(3); 

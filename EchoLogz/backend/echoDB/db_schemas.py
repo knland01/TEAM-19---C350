@@ -37,7 +37,7 @@ from datetime import datetime
 from pydantic import BaseModel, EmailStr, ConfigDict
 
 
-# ---------- Inputs ----------
+# ---------- Inputs ----------------------------------------------------------------------------------------
 class UserCreate(BaseModel):
     """Validates incoming JSON when the user is being created."""
     email: EmailStr
@@ -49,7 +49,9 @@ class UserUpdate(BaseModel):
     email: EmailStr | None = None 
     password: str | None = None
     # username: str | None = None
-# ---------- Outputs ----------
+
+# ---------- Outputs ----------------------------------------------------------------------------------------
+
 class UserOut(BaseModel):
     """Validates / shapes user DB data API sends back to the client."""
     id: int
@@ -60,6 +62,10 @@ class UserOut(BaseModel):
     # pydantic v2 syntax
     # Pydantic model can receive objects with attributes (like SQLAlchemy ORM models) -> read their data 
     # ... using dot-notation instead of expecting a dictionary.
+
+class SignupOut(BaseModel):
+    user: UserOut
+    verify_expires_in: int
 
 class TokenOut(BaseModel):
     """Validates standard OAuth2 token response format."""

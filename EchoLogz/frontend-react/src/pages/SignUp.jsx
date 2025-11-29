@@ -6,6 +6,7 @@ import Navbar from '../components/Navbar.jsx';
 import {StepIndicator} from "../components/StepIndicator.jsx";
 import {AccountStep} from "../components/AccountStep.jsx";
 import {CodeStep} from "../components/CodeStep.jsx";
+import {SpotifyLinkStep} from '../components/SpotifyLinkStep.jsx';
 import '../pw-style.css';
 
 export default function SignUp() {
@@ -14,27 +15,88 @@ export default function SignUp() {
     // ... setStep useState(1)--> STEP 1: Account info
     // ... setStep useState(2) ---> STEP 2: Verification code
     const [loading, setLoading] = useState(false); // loading useState(true) = talking to backend
+    const [signupEmail, setSignupEmail] = useState(""); // email from step 1 → shown in step 2
+    const [verifyToken, setVerifyToken] = useState("");  // JWT returned from /signup
+    const [codeErrors, setCodeErrors] = useState({}); // errors shown in CodeStep
+
+    // Called by AccountStep when signup + send-code succeeds.
+    // You can already bump step in AccountStep, but having a dedicated
+    // handler here keeps the flow obvious.
+    function handleSignupSuccess({ email, verifyToken, verifyExpiresIn }) {
+        setSignupEmail(email);
+        setVerifyToken(verifyToken);
+        setCodeErrors({});
+        setStep(2);
+    }
+
+    // Step 2: verify code
+    async function handleVerifyClick() {
+        if (!verifyToken) {
+            setCodeErrors({ code: "Missing verification token. Please sign up again." });
+            return;
+        }
+
+        setLoading(true);
+        setCodeErrors({});
+        try {
+            const resp = await fetch("http://localhost:8000/auth/verify-email", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ token: verifyToken }),
+            });
+
+            if (!resp.ok) {
+            const data = await resp.json().catch(() => null);
+            const msg = data?.detail || "Verification failed.";
+            setCodeErrors({ code: msg });
+            return;
+            }
+
+            // success → move to Spotify link step
+            setStep(3);
+        } catch (err) {
+            console.error("Verify error:", err);
+            setCodeErrors({ code: "Network error. Please try again." });
+        } finally {
+            setLoading(false);
+        }
+    }
 
     return (
-        <div className="app-container">
-            <Navbar />
+    <div className="app-container">
+        <Navbar />
 
-            <div className="reset-container">
-                <div className="reset-panel panel">
+        <div className="reset-container">
+            <div className="reset-panel panel">
+                <StepIndicator step={step} />
 
-                    <StepIndicator step={step} />
+                {step === 1 && (
+                <AccountStep
+                    loading={loading}
+                    setLoading={setLoading}
+                    setStep={setStep}
+                    onSignupSuccess={handleSignupSuccess}
+                />
+                )}
 
-                    {step === 1 ? (
-                        <AccountStep
-                            loading={loading}
-                            setLoading={setLoading}
-                            setStep={setStep}
-                        />
-                    ) : (
-                        <CodeStep /> // Verification code
-                    )}
-                </div>
+                {step === 2 && (
+                <CodeStep
+                    email={signupEmail}
+                    errors={codeErrors}
+                    loading={loading}
+                    handleCodeSubmit={handleVerifyClick}
+                    goBack={() => setStep(1)}
+                />
+                )}
+
+                {step === 3 && (
+                <SpotifyLinkStep
+                    loading={loading}
+                    setLoading={setLoading}
+                />
+                )}
             </div>
         </div>
-    );
+    </div>
+  );
 }

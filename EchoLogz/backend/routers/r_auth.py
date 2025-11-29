@@ -74,15 +74,16 @@ EXTERNAL IMPORTS (parts have been moved to security.py)
 
 # INTERNAL MODULES:
 from backend.core.dependencies import get_db
-from backend.echoDB.db_schemas import UserCreate, UserOut, TokenOut
+from backend.echoDB.db_schemas import UserCreate, UserOut, TokenOut, SignupOut
 from backend.echoDB import db_crud
 from backend.core import security
 
+
 # EXTERNAL MODULES: 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
-
+from jose import JWTError
 
 router = APIRouter(prefix="/auth", tags=["auth"])                 
 # logically groups all auth - routers defined below w/ @router, adding '/auth' to each endpoint (ex: /auth/signup)
@@ -96,7 +97,7 @@ router = APIRouter(prefix="/auth", tags=["auth"])
     # .PATCH:  "Update the part of existing thing."
     # .DELETE: "Remove this thing."
 
-@router.post("/signup", response_model=UserOut, status_code=201)
+@router.post("/signup", response_model=SignupOut, status_code=201)
 def signup(payload: UserCreate, db: Session = Depends(get_db)):
     """Creates a new user account.
         - validates request body, check email exists, hashes pw, inserts user -> DB
@@ -110,7 +111,63 @@ def signup(payload: UserCreate, db: Session = Depends(get_db)):
         email=payload.email,
         hashed_pw=hashed,
     )
-    return UserOut.model_validate(user)
+    # SHORT-LIVED EMAIL V.TOKEN + URL:
+    verify_token, expires_in = security.create_email_verify_token(email=user.email)
+    verify_url = f"http://localhost:8000/auth/verify-email?token={verify_token}"
+    print("DEBUG: EMAIL VERIFY LINK -->", verify_url) # Temp --> replace with real email sending service pipeline
+    print(f"DEBUG: Verification link expires in {expires_in} minutes.")
+    return {
+        "user": UserOut.model_validate(user),
+        "verify_expires_in": expires_in
+    }
+
+@router.post("/verify-email")
+def verify_email(token: str, db: Session = Depends(get_db)):
+    try:
+        email = security.decode_email_verify_token(token)
+    except JWTError:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid or expired email verification token",
+        )
+
+    user = db_crud.get_user_by_email(db, email)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    if user.is_verified:
+        return {"detail": "Email already verified"}
+
+    user.is_verified = True
+    db.commit()
+    db.refresh(user)
+
+    return {
+        "detail": "Email verified successfully",
+        "user": UserOut.model_validate(user),
+    }
+
+
+@router.post("/resend-verification")
+def resend_verification(email: str, db: Session = Depends(get_db)):
+    """
+    TODO: CODING ASSIGNMENT -- Resend email verification link to a user.
+    Intended behavior (for future implementation):
+      - Look up the user by email.
+      - If user does not exist → 404.
+      - If user.is_verified is True → 400 ("Already verified").
+      - If user is not verified:
+          * Enforce a cooldown (1 request / minute) ?
+          * Generate a new email verification token.
+          * Build a new verify URL.
+          * Send the URL via email (or log/return it during development).
+    """
+    # --- PLACEHOLDER IMPLEMENTATION ---
+    # ... For now, just return message so frontend / docs don't break.
+    raise HTTPException(
+        status_code=501,
+        detail="FUTURE TASK: Resend verification endpoint not implemented yet. "
+    )
 
 @router.post("/login", response_model=TokenOut)
 def login(form: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):

@@ -52,6 +52,9 @@ ACCESS_TOKEN_EXPIRE_MIN = 60
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto") # bcrypt = password hashing algorithm
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")      # extracts Bearer JWT token from Authorization header
 
+
+
+
 # ------------------------------------------------------------------
 # Security Helpers: only used w/ FastAPI functions
 # ------------------------------------------------------------------
@@ -64,10 +67,10 @@ def _verify_password(plain: str, hashed: str) -> bool:
     """FOR login authentication: Validate a plaintext password against its stored hashed version."""
     return pwd_context.verify(plain, hashed)
 
-def _create_access_token(sub: str, minutes: int | None = None) -> str:
+def _create_access_token(sub: str, minutes: int | None = None, extra_claims: dict | None = None) -> str:
     """Create a signed JWT access token.
     Parameters:
-        sub:      The subject identifier (typically user ID or email).
+        sub:      The subject identifier (ex: id / email).
         minutes:  Optional custom expiration window. If omitted, uses the
                   default ACCESS_TOKEN_EXPIRE_MIN value.
     Returns: A signed JWT string containing the subject and expiration timestamp.
@@ -76,6 +79,8 @@ def _create_access_token(sub: str, minutes: int | None = None) -> str:
         minutes=minutes or ACCESS_TOKEN_EXPIRE_MIN
     )
     payload = {"sub": sub, "exp": expire}
+    if extra_claims:
+        payload.update(extra_claims)
     return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
 
 def _decode_subject(token: str) -> str:
@@ -90,9 +95,9 @@ def _decode_subject(token: str) -> str:
         raise JWTError("missing sub")
     return str(sub)
 
-# ----------------------------------------------
+# ------------------------------------------------------
 # Security Dependencies - FastAPI Depends(...) Functions
-# ----------------------------------------------
+# ------------------------------------------------------
 
 def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> UserOut:
     """Validates incoming request belongs to authenticated user — then provides that user's data to the route."""
@@ -108,3 +113,46 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return UserOut.model_validate(user)
+
+# -------------------------------------------------
+# Token Builders
+# -------------------------------------------------
+
+# def create_email_verify_token(email: str) -> str:
+#     return _create_access_token(
+#         sub=email,
+#         minutes=15,  # expires in 15 min
+#         extra_claims={"purpose": "email_verify"},
+#     )
+
+def create_email_verify_token(email: str) -> tuple[str, int]:
+    """
+    Returns (token, expires_at_timestamp)
+    """
+    expires_in_minutes = 15
+
+    # Build token using your existing helper
+    token = _create_access_token(
+        sub=email,
+        minutes=expires_in_minutes,
+        extra_claims={"purpose": "email_verify"},
+    )
+    return token, expires_in_minutes
+
+
+def decode_email_verify_token(token: str) -> str:
+    """
+    Decode an email verification token.
+    Returns the email (sub) if valid, otherwise raises JWTError.
+    """
+    payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+
+    if payload.get("purpose") != "email_verify":
+        raise JWTError("invalid purpose")
+
+    sub = payload.get("sub")
+    if not sub:
+        raise JWTError("missing sub")
+
+    return str(sub)
+
