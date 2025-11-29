@@ -29,26 +29,35 @@ export default function SignUp() {
 
     // Step 2: verify email using token
     async function handleVerifyClick() {
-        if (!verifyToken) {
-            setCodeErrors({ code: "Missing verification token. Please sign up again." });
+        if (!signupEmail) {
+            setCodeErrors({ code: "Missing email. Please sign up again." });
             return;
         }
 
         setLoading(true);
         setCodeErrors({});
         try {
-            const resp = await fetch(
-            `http://localhost:8000/auth/verify-email?token=${encodeURIComponent(verifyToken)}`
-            );
+            const resp = await fetch(`http://localhost:8000/auth/verify-status?email=${encodeURIComponent(signupEmail)}`);
 
             if (!resp.ok) {
             const data = await resp.json().catch(() => null);
-            const msg = data?.detail || "Verification failed.";
+            const msg = data?.detail || "Could not check verification status.";
             setCodeErrors({ code: msg });
             return;
             }
 
-            // success → move to Spotify link step
+            const data = await resp.json();
+            console.log("verify-status:", data);
+
+            if (!data.is_verified) {
+                setCodeErrors({
+                    code:
+                    "Please verify your email by clicking the link we sent, " +
+                    "then click this button again.",
+                });
+                return;
+            }
+                // Email is verified in DB → move to Spotify step
             setStep(3);
         } catch (err) {
             console.error("Verify error:", err);
@@ -57,6 +66,7 @@ export default function SignUp() {
             setLoading(false);
         }
     }
+
 
     return (
     <div className="app-container">

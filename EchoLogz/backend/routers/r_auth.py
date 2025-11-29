@@ -152,6 +152,12 @@ def verify_email(token: str, db: Session = Depends(get_db)):
         "user": UserOut.model_validate(user),
     }
 
+@router.get("/verify-status")
+def verify_status(email: str, db: Session = Depends(get_db)):
+    user = db_crud.get_user_by_email(db, email)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return {"is_verified": user.is_verified}
 
 @router.post("/resend-verification")
 def resend_verification(email: str, db: Session = Depends(get_db)):
