@@ -1,11 +1,17 @@
 import { useState } from 'react';
 import { Routes, Route} from 'react-router-dom';
-import SignUp from './pages/SignUp';
 import Navbar from './components/Navbar.jsx';
+import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import './App.css';
+import SignUp from './pages/SignUp';
 import Index from "./pages/Index.jsx";
 import Login from "./pages/Login.jsx";
 import Home from "./pages/Home.jsx";
+import Account from "./pages/Account.jsx";
+import PasswordReset from "./pages/PasswordReset.jsx";
+import History from "./pages/History.jsx";
+import Error from "./pages/Error.jsx";
+
 
 function Placeholder({ label }) {
     return <div style={{ opacity: 0.9 }} className="muted">{label}</div>;
@@ -54,14 +60,33 @@ function EchoLogzMockup() {
     );
 }
 
-// REACT ROUTER:
+
 export default function App() {
+    const [signedIn, setSignedIn] = useState(false);
+    const [user, setUser] = useState(null);
+
+    function handleLoginSuccess(userData) {
+        setSignedIn(true);
+        setUser(userData);     // ex: { email, username, id, ... }
+    }
+
+    function handleLogout() {
+        setSignedIn(false);
+        setUser(null);
+        // TODO: clear tokens/localStorage here (if needed)
+    }
     return <>
         <Routes>
-            <Route path="/" element={<Home/>} />
+            <Route path="/" element={<Home signedIn={signedIn} />} />
             <Route path="/sign_up" element={<SignUp/>} />
-            <Route path="/log_in" element={<Login/>} />
-            <Route path="/dashboard" element={<Index/>} />
+            <Route path="/log_in" element={<Login onLoginSuccess={handleLoginSuccess} />} />
+            <Route path="/account" element={<ProtectedRoute signedIn={signedIn}><Account user={user} onLogout={handleLogout} /></ProtectedRoute>} />
+            <Route path="/reset_password" element={<PasswordReset />} />
+            <Route path="/dashboard" element={<ProtectedRoute signedIn={signedIn}><Index user={user} onLogout={handleLogout} /></ProtectedRoute>} />
+            <Route path="/history" element={<ProtectedRoute signedIn={signedIn}><History user={user} onLogout={handleLogout} /></ProtectedRoute>} />
+            <Route path="/reset_password" element={<PasswordReset />} />
+            <Route path="/error" element={<Error />} />
+            <Route path="*" element={<Error />} />
         </Routes>
     </>;
 }

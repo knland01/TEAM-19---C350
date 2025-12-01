@@ -27,11 +27,13 @@ export default function Home() {
       <Navbar />
       <div className="hero-section">
           <h2 className="hero-title">Find Your Music Match.</h2>
-          <p className="hero-subtitle">
+          <div className="hero-subtitle">
               <h2>Discover who you really vibe with — friends, partners, coworkers or total strangers.</h2>
+              <p>
               EchoLogz creates a musical identity for you based on your Spotify playlists
               <br />and helps you find compatible matches through shared musical tastes.
-          </p>
+              </p>
+          </div>
 
           <button
               className="btn primary"

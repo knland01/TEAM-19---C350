@@ -13,7 +13,7 @@ import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar.jsx";
 import "../pw-style.css";
 
-export default function Login() { // exportable Login React component
+export default function Login({ onLoginSuccess }) { // exportable Login React component
     // STATE VARIABLES:
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -21,7 +21,7 @@ export default function Login() { // exportable Login React component
     const [errors, setErrors] = useState({});
 
     const navigate = useNavigate(); 
-    
+
     // ASYNC HANDLER:
     async function handleLoginSubmit(event) { // async function that runs when form submitted
         if (event && event.preventDefault) { // prevents full-page reload (default) when form submits 
@@ -68,8 +68,17 @@ export default function Login() { // exportable Login React component
                 return;
         }
         const data = await resp.json(); // if resp.ok parse JSON = TokenOut {access_token, token_type}
+        const userData = {
+            email,                     // already know the email
+            accessToken: data.access_token, // data sent from the backend
+            tokenType: data.token_type, // data sent from the backend
+        };
         console.log("Login success:", data); // send dev message to console indicating success
-        navigate("/"); // Redirect to dashboard (Index.jsx is mapped to "/")
+        if (onLoginSuccess) {
+            onLoginSuccess(userData); // flip signedin flag to true (in App.jsx)
+        }// 
+        navigate("/dashboard"); // Redirect to dashboard (Index.jsx is mapped to "/")
+
         // TODO: store data.access_token = JWT (in localStorage or context ?)
         // TODO: redirect to dashboard / home page
         } catch (err) { // if the fetch throws error (like: server down, no internet, CORS blocks...)

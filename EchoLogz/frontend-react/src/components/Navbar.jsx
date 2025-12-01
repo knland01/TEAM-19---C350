@@ -9,11 +9,13 @@
 
 import { Link } from "react-router-dom";
 
-export default function Navbar({signedIn=false, username='', active=''}) {
+export default function Navbar({signedIn=false, user='', active='', onLogout = () => {}}) {
     return (
     <nav className="navbar">
         <div className="navbar-left">
-        <a href="index.html" style={{textDecoration: 'none', color: 'inherit'}}>
+        <Link to={signedIn ? "/dashboard" : "/"} 
+            style={{ textDecoration: 'none', color: 'inherit' }}
+        >
             <header className="site-brand">
                 <div className="logo">EL</div>
                 <div>
@@ -21,15 +23,23 @@ export default function Navbar({signedIn=false, username='', active=''}) {
                 <p className="lead">{signedIn ? 'Your Music. Your Match.' : 'Your music. Your match.'}</p>
                 </div>
             </header>
-        </a>
+        </Link>
         </div>
         <div className="navbar-right">
         {signedIn ? (
             <>
-            <a href="/index" className={`nav-link ${active==="Dashboard"?"active":""}`}>Dashboard</a>
-            <a href="history_mockup.html" className={`nav-link ${active==="Saved"?"active":""}`}>Saved</a>
-            <a href="account.html" className={`nav-link ${active==="Account"?"active":""}`}>Account</a>
-            <a href="/log_in" className="nav-link signup">Log Out</a>
+            <Link to="/dashboard" className={`nav-link ${active==="Dashboard"?"active":""}`}>Dashboard</Link>
+            <Link to="/history" className={`nav-link ${active==="Saved"?"active":""}`}>History</Link>
+            <Link to="/account" className={`nav-link ${active==="Account"?"active":""}`}>Account</Link>
+            <Link to="/log_in" className="nav-link signup">Log Out</Link>
+            <span className="nav-link" 
+                style={{ cursor: "pointer" }} 
+                onClick={onLogout}>
+                Logout
+            </span>
+            <span className="nav-user">
+                {user?.email ?? user}
+            </span>
             </>
         ) : (
             <>

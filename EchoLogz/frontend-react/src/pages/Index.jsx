@@ -37,7 +37,7 @@ export default function Index() {
 
     return (
         <>
-            <Navbar/>
+            <Navbar signedIn={signedIn} user={user} active="Dashboard" onLogout={onLogout} />
         <div className="app">
             <aside className="panel">
                 <section className="create-join">
