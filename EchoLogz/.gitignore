@@ -22,3 +22,21 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Python
+__pycache__/
+*.pyc
+
+# Envs
+.env
+
+# DB / data
+*.db
+/data/
+
+# IDE
+.vscode/
+.idea/
+
+# KL
+style2.css
