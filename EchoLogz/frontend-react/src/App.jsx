@@ -4,6 +4,7 @@ import SignUp from './pages/SignUp';
 import Navbar from './components/Navbar.jsx';
 import './App.css';
 import Index from "./pages/Index.jsx";
+import Login from "./pages/Login.jsx";
 
 function Placeholder({ label }) {
     return <div style={{ opacity: 0.9 }} className="muted">{label}</div>;
@@ -52,11 +53,13 @@ function EchoLogzMockup() {
     );
 }
 
+// REACT ROUTER:
 export default function App() {
     return <>
         <Routes>
             <Route path="/" element={<Index/>} />
             <Route path="/sign_up" element={<SignUp/>} />
+            <Route path="/log_in" element={<Login/>} />
         </Routes>
     </>;
 }

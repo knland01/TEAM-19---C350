@@ -1,3 +1,15 @@
+/**
+ * MODULE: components/ConnectSpotify.jsx
+ * 
+ * Handles the Spotify OAuth connection UI after the user is authenticated.
+ * 
+ * Provides a button or link that starts the Spotify OAuth process and displays
+ * state related to connecting the user's Spotify account. Assumes the user
+ * is already logged in and has a valid Echologz account.
+ */
+
+
+
 /*// // src/components/SpotifyLinkStep.jsx
 // import React from "react";
 

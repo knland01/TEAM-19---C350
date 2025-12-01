@@ -1,3 +1,14 @@
+/** 
+ * MODULE: components/AccountStep.jsx
+ * 
+ * Step 1 of the signup flow.
+ * 
+ * Renders the "Create Account" form and handles all local client-side validation.
+ * Submits the signup request to /auth/signup and reports success back to SignUp.jsx
+ * through onSignupSuccess(). Does not manage routing or multi-step flow logic.
+ */
+
+
 import {useState} from "react";
 import {passwordsMatch, validateEmail, validatePassword} from "../utils.js";
 

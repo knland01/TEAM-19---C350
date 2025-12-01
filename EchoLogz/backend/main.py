@@ -27,6 +27,7 @@ BACKEND: Terminal 1
     Access the running server at: 
                 https://127.0.0.1:8000/
                 http://127.0.0.1:8000/docs <-- Swagger UI (FastAPI Interactive - API Documentation)
+                http://localhost:8000/docs <-- or this
 -----------------------------------------------------------------------------------------------------------------------
 FRONTEND: Terminal 2
     Run local server with Terminal Command: 

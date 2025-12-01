@@ -74,7 +74,7 @@ EXTERNAL IMPORTS (parts have been moved to security.py)
 
 # INTERNAL MODULES:
 from backend.core.dependencies import get_db
-from backend.echoDB.db_schemas import UserCreate, UserOut, TokenOut, SignupOut
+from backend.echoDB.db_schemas import UserCreate, UserOut, TokenOut, SignupOut, LoginRequest
 from backend.echoDB import db_crud
 from backend.core import security
 from backend.core.email_client import send_verification_email
@@ -87,7 +87,7 @@ from sqlalchemy.orm import Session
 from jose import JWTError
 
 router = APIRouter(prefix="/auth", tags=["auth"])                 
-# logically groups all auth - routers defined below w/ @router, adding '/auth' to each endpoint (ex: /auth/signup)
+# ... logically groups all auth - routers defined below w/ @router, adding '/auth' to each endpoint (ex: /auth/signup)
 
 # ------------------------------------------------------------------
 # Routes
@@ -97,6 +97,8 @@ router = APIRouter(prefix="/auth", tags=["auth"])
     # .PUT:    "Replace existing thing with new thing."
     # .PATCH:  "Update the part of existing thing."
     # .DELETE: "Remove this thing."
+
+# ===========================================================================================================
 
 @router.post("/signup", response_model=SignupOut, status_code=201)
 def signup(payload: UserCreate, background: BackgroundTasks, db: Session = Depends(get_db)):
@@ -126,8 +128,18 @@ def signup(payload: UserCreate, background: BackgroundTasks, db: Session = Depen
         "verify_expires_in": expires_in
     }
 
+# ===========================================================================================================
+
 @router.get("/verify-email")
 def verify_email(token: str, db: Session = Depends(get_db)):
+    """
+    Endpoint triggered when user clicks verification link sent to signup email (DEV: -> terminal). 
+    Token decoded --> extracts associated email. 
+    - Token valid + user exists --> `is_verified` flag = True. 
+    - User already verified --> endpoint simply returns a confirmation message. 
+       -- HTTPException(400): If the token is invalid / expired.
+       -- HTTPException(404): If no user exists for the decoded email.
+    """
     try:
         email = security.decode_email_verify_token(token)
     except Exception:
@@ -152,12 +164,19 @@ def verify_email(token: str, db: Session = Depends(get_db)):
         "user": UserOut.model_validate(user),
     }
 
+# ===========================================================================================================
+
 @router.get("/verify-status")
 def verify_status(email: str, db: Session = Depends(get_db)):
+    """
+    When user clicks "I've verified my email" -- `is_verified` flag is checked before allowing signup to proceed.
+    """
     user = db_crud.get_user_by_email(db, email)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return {"is_verified": user.is_verified}
+
+# ===========================================================================================================
 
 @router.post("/resend-verification")
 def resend_verification(email: str, db: Session = Depends(get_db)):
@@ -180,13 +199,20 @@ def resend_verification(email: str, db: Session = Depends(get_db)):
         detail="FUTURE TASK: Resend verification endpoint not implemented yet. "
     )
 
+# ===========================================================================================================
+
 @router.post("/login", response_model=TokenOut)
-def login(form: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
-    """Authenticates a user and returns an access token.
-    - validates email + password against DB, raises 401 for bad credentials, generates a JWT access token (sub = email)
-    Returns: token shaped as TokenOut.
+# def login(form: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)): OAuth2 form expects a username
+def login(login: LoginRequest, db: Session = Depends(get_db)):
     """
-    user = db_crud.get_user_by_email(db, form.email)
+    Authenticates a user and returns an access token.
+    - Looks up user by email.
+    - Verifies the password against the stored hash.
+    - Ensures the account's email  `is_verified`.
+    - raises 404, 401, 403 for no acct, incorrect pw, no email verification.
+    - ON SUCCESS: generates a JWT access token (shaped as TokenOut).
+    """
+    user = db_crud.get_user_by_email(db, login.email)
     # No user account found --> 404
     if not user:
         raise HTTPException(
@@ -194,7 +220,7 @@ def login(form: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get
             detail="No account found for this email. Please sign up."
         )
     # Correct email / wrong password --> 401
-    if not security._verify_password(form.password, user.hashed_password):
+    if not security._verify_password(login.password, user.hashed_password):
         raise HTTPException(
             status_code=401, 
             detail="Incorrect password.")
@@ -207,6 +233,8 @@ def login(form: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get
     # Everything is correct --> JWT granted
     token = security._create_access_token(sub=user.email)
     return TokenOut(access_token=token)
+
+# ===========================================================================================================
 
 @router.get("/me", response_model=UserOut)
 def me(current: UserOut = Depends(security.get_current_user)):

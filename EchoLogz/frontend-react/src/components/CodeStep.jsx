@@ -1,4 +1,13 @@
-// CodeStep.jsx
+/**
+ * MODULE: components/CodeStep.jsx
+ * Step 2 of the signup flow.
+ * 
+ * Displays the email verification instructions and provides UI for checking whether
+ * the user has clicked the verification link. Invokes onVerifyClick() to trigger the
+ * backend verification status check. Errors and success states are controlled by
+ * the parent SignUp.jsx.
+ */
+
 import {useState} from "react";
 import React from "react";
 

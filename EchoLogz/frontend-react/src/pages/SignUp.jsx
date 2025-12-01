@@ -1,4 +1,15 @@
-// src/SignUp.jsx
+/**
+ * MODULE: pages/SignUp.jsx
+ * 
+ * Main signup page controller.
+ * 
+ * Manages the multi-step signup pipeline, including step navigation, loading state,
+ * verification state, success states, and error handling. Renders AccountStep for
+ * creating the account and CodeStep for email verification. Coordinates backend calls
+ * and determines when the user advances to the next step.
+ */
+
+
 import { useState } from 'react'; 
 // ... react stores state in variable (ex: step, loading) | changes state with function (ex: setStep, setLoading) 
 import Navbar from '../components/Navbar.jsx';

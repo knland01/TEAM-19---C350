@@ -1,3 +1,14 @@
+/**
+ * MODULE: components/Navbar.jsx
+ * 
+ * Global navigation bar component.
+ * 
+ * Provides site-wide navigation links and branding. Contains UI only – no backend
+ * communication and no page-level state. Reused across multiple pages.
+ */
+
+import { Link } from "react-router-dom";
+
 export default function Navbar({signedIn=false, username='', active=''}) {
     return (
     <nav className="navbar">
@@ -18,11 +29,11 @@ export default function Navbar({signedIn=false, username='', active=''}) {
             <a href="/index" className={`nav-link ${active==="Dashboard"?"active":""}`}>Dashboard</a>
             <a href="history_mockup.html" className={`nav-link ${active==="Saved"?"active":""}`}>Saved</a>
             <a href="account.html" className={`nav-link ${active==="Account"?"active":""}`}>Account</a>
-            <a href="/sign_in" className="nav-link signup">Log Out</a>
+            <a href="/log_in" className="nav-link signup">Log Out</a>
             </>
         ) : (
             <>
-            <a href="/sign_in" className="nav-link">Log In</a>
+            <Link to="/log_in" className="nav-link">Log In</Link>
             <a href="/sign_up" className="nav-link signup">Sign Up</a>
             </>
         )}

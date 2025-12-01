@@ -1,5 +1,11 @@
-// StepIndicator.jsx
-// Visually displays Steps/Completion on signup screen. 
+/**
+ * MODULE: components/StepIndicator.jsx
+ * 
+ * Visual step indicator for the multi-step signup process.
+ * 
+ * Receives the current step number from SignUp.jsx and visually displays progress
+ * (Step 1 → Step 2). Contains no business logic.
+ */
 
 export function StepIndicator({ step }) {
     return (

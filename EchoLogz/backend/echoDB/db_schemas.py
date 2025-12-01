@@ -50,6 +50,10 @@ class UserUpdate(BaseModel):
     password: str | None = None
     # username: str | None = None
 
+class LoginRequest(BaseModel):
+    email: EmailStr
+    password: str
+
 # ---------- Outputs ----------------------------------------------------------------------------------------
 
 class UserOut(BaseModel):
@@ -74,7 +78,7 @@ class TokenOut(BaseModel):
     token_type: str = "bearer"
 
 
-# --------- SPOTIFY ----------
+# --------- SPOTIFY ----------------------------------------------------------------------------------------
 class SpotifyAccountBase(BaseModel):
     spotify_user_id: str
     scope: str | None = None
