@@ -40,3 +40,5 @@ __pycache__/
 
 # KL
 style2.css
+
+venv/

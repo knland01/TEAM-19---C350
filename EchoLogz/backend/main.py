@@ -25,7 +25,7 @@ BACKEND: Terminal 1
                     uvicorn backend.main:app --reload
 
     Access the running server at: 
-                http://127.0.0.1:8000/
+                https://127.0.0.1:8000/
                 http://127.0.0.1:8000/docs <-- Swagger UI (FastAPI Interactive - API Documentation)
 -----------------------------------------------------------------------------------------------------------------------
 FRONTEND: Terminal 2
