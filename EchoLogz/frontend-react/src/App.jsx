@@ -56,7 +56,7 @@ function EchoLogzMockup() {
 
 function loadStoredUser() {
   try {
-    const raw = localStorage.getItem("echologz_user");
+    const raw = localStorage.getItem("echologz_user"); // localStorage is built into every browser
     if (!raw) return null;
     const parsed = JSON.parse(raw);
     if (!parsed || !parsed.accessToken) return null;
@@ -69,22 +69,11 @@ function loadStoredUser() {
 export default function App() {
     const [signedIn, setSignedIn] = useState(false);
     const [user, setUser] = useState(() => !!loadStoredUser());
+    // const [sessionCode, setSessionCode] = useState('');
+    // const [playlistUrl, setPlaylistUrl] = useState('');
+    // const [joined, setJoined] = useState(false);
+    // const [oauthConnected, setOauthConnected] = useState(false);
 
-    // useEffect(() => {
-    //     const stored = localStorage.getItem("echologz_user");
-    //     if (stored) {
-    //         try {
-    //             const parsed = JSON.parse(stored);
-    //             if (parsed && parsed.accessToken) {
-    //                 setUser(parsed);
-    //                 setSignedIn(true);
-    //             }
-    //         } catch (e) {
-    //             console.error("Failed to parse stored user:", e);
-    //             localStorage.removeItem("echologz_user");
-    //         }
-    //     }
-    // }, []);
 
     function handleLoginSuccess(userData) {
         setSignedIn(true);
@@ -96,6 +85,8 @@ export default function App() {
         setSignedIn(false);
         setUser(null);
         localStorage.removeItem("echologz_user");
+        // FUTURE: Will need to remove more stuff here as it is added to LocalStorage
+        window.location.href = "/";
     }
 
     function connectSpotify(){
@@ -126,3 +117,22 @@ export default function App() {
         </Routes>
     </>;
 }
+
+
+
+/* ----------------------------- CODE GRAVEYARD --------------------------- */
+    // useEffect(() => {
+    //     const stored = localStorage.getItem("echologz_user");
+    //     if (stored) {
+    //         try {
+    //             const parsed = JSON.parse(stored);
+    //             if (parsed && parsed.accessToken) {
+    //                 setUser(parsed);
+    //                 setSignedIn(true);
+    //             }
+    //         } catch (e) {
+    //             console.error("Failed to parse stored user:", e);
+    //             localStorage.removeItem("echologz_user");
+    //         }
+    //     }
+    // }, []);

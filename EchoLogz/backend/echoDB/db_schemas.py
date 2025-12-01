@@ -111,3 +111,10 @@ class SpotifyAccountUpdate(BaseModel):
     expires_at: datetime | None = None
     scope: str | None = None
     last_synced_at: datetime | None = None
+
+# --------------- Music Identity / Compatibility ---------------------------------
+
+class IdentityResp(BaseModel):
+    user_id: int
+    dimension: int
+    vector: list[float]

@@ -32,6 +32,7 @@ Modules using r_auth.py:
 from backend.core.dependencies import get_db
 from backend.services.score import calc_compatibility
 from backend.services.spot_feature_vectors import build_feature_vector
+from backend.echoDB.db_schemas import IdentityResp
 
 # EXTERNAL MODULES:
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -96,3 +97,30 @@ def post_compare(req: CompareReq, db: Session = Depends(get_db)):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(e),
         )
+    
+@router.get("/identity/{user_id}", response_model=IdentityResp)
+def get_user_identity(
+    user_id: int,
+    sample: str = "medium_term",
+    db: Session = Depends(get_db)
+):
+    """
+    Return the user's derived musical identity vector.
+    This calls build_feature_vector() and returns ONLY numeric data.
+    """
+
+    vec = build_feature_vector(
+        db=db,
+        user_id=user_id,
+        sample=sample,
+    )
+
+    if not vec:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Unable to compute musical identity. "
+                   "User may not have Spotify connected "
+                   "or lacks sufficient listening data."
+        )
+
+    return IdentityResp(user_id=user_id,dimension=len(vec),vector=vec)

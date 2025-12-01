@@ -62,10 +62,50 @@ import numpy as np
 from datetime import datetime, timezone
 from backend.services.utils import normalize_vector
 
+# Ordered list of keys that define our feature vector
+AUDIO_FEATURE_KEYS = [
+    "acousticness",
+    "danceability",
+    "energy",
+    "instrumentalness",
+    "liveness",
+    "loudness",
+    "speechiness",
+    "tempo",
+    "valence",
+    "duration_ms",
+    "key",
+    "mode",
+    "time_signature",
+]
 
-def build_feature_vector(db: Session, user_id: int, sample: str = "medium_term") -> list[float] | None:
+SPOTIFY_FEATURE_RANGES = {
+    "acousticness":     (0.0, 1.0),
+    "danceability":     (0.0, 1.0),
+    "energy":           (0.0, 1.0),
+    "instrumentalness": (0.0, 1.0),
+    "liveness":         (0.0, 1.0),
+    "speechiness":      (0.0, 1.0),
+    "valence":          (0.0, 1.0),
+    "mode":             (0.0, 1.0),      # 0 or 1
+    "key":              (0.0, 11.0),     # 12 musical keys (0–11)
+    
+    # Spotify gives "typical working ranges"
+    "loudness":         (-60.0, 0.0),     # from API docs
+    "tempo":            (0.0, 250.0),     # Spotify docs say tempo rarely > 250 BPM
+    "duration_ms":      (0.0, 600000.0),  # rare to exceed 10 minutes, doc references
+    "time_signature":   (1.0, 7.0),       # Spotify says 3–7 are common, but 1–7 possible
+}
+
+
+def build_feature_vector(db: Session, user_id: int, sample: str = "medium_term") -> dict[str, object] | None:
     # DB + Spotify + high-level orchestration
-
+    """
+    Return FULL music profile containing:
+      - raw feature means (real units)
+      - scaled feature vector in [0,1]
+      - labels aligned to the vector
+    """
     # Step 1: Lookup EchoLogz user (assumes valid user_id given)
     user = db_crud.get_user_by_id(db, user_id)
     if not user:
@@ -87,30 +127,164 @@ def build_feature_vector(db: Session, user_id: int, sample: str = "medium_term")
 
     access_token = spotify_account.access_token
 
-    # Step 4: Get Spotify tracks for the user
-    track_ids = spot_calls.get_user_top_tracks(access_token, time_range=sample)
+    # Step 4: Get Spotify tracks for the user (top tracks JSON → IDs)
+    top_resp = spot_calls.get_user_top_tracks(
+        access_token,
+        time_range=sample,
+        limit=50
+    )
+    items = top_resp.get("items", [])
+    track_ids = [
+        t["id"] for t in items
+        if isinstance(t, dict) and t.get("id")
+    ]
     if not track_ids:
         return None
 
     # Step 5: Get audio features
     raw_features = spot_calls.get_audio_features(access_token, track_ids)
-    if not raw_features:
+    audio_features = raw_features.get("audio_features") or []
+    if not audio_features:
         return None
 
-    # Step 6–7: Reduce to taste vector and return
-    return _matrix_features_to_vector(raw_features)
+    # Step 6–7: Build profile and return raw and scaled vector
+    music_profile = build_music_profile(audio_features)
 
 
-def _matrix_features_to_vector(raw_features: dict[str, dict[str, float]]) -> list[float]:
-    # math only
+    return music_profile
 
-    if not raw_features:
-        return []
-
-    matrix = np.array([list(track.values()) for track in raw_features.values()])
-    mean_vector = matrix.mean(axis=0)
-    return normalize_vector(mean_vector).tolist()
 
 
 def _token_is_expired(spotify_account) -> bool:
     return spotify_account.token_expires_at < datetime.now(timezone.utc)
+
+
+# ================================================================================
+#         MATH ONLY HELPERS
+# ================================================================================
+
+
+# --------------------------------------------------------
+# Compute RAW MEANS (identity values shown to the user)
+# --------------------------------------------------------
+def _compute_raw_means(audio_features_list: list[dict]) -> dict[str, float]:
+    rows = []
+    for feat in audio_features_list:
+        row = []
+        for key in AUDIO_FEATURE_KEYS:
+            v = feat.get(key)
+            if v is None:
+                v = 0.0
+            row.append(float(v))
+        rows.append(row)
+
+    if not rows:
+        return {}
+
+    matrix = np.array(rows, dtype=float)
+    means = matrix.mean(axis=0)
+
+    return {key: float(val) for key, val in zip(AUDIO_FEATURE_KEYS, means)}
+
+
+# --------------------------------------------------------
+# Scale raw means to 0–1 using official Spotify ranges
+# --------------------------------------------------------
+def _scale_using_spotify_ranges(raw: dict[str, float]) -> list[float]:
+    scaled = []
+    for key in AUDIO_FEATURE_KEYS:
+        v = raw.get(key, 0.0)
+        fmin, fmax = SPOTIFY_FEATURE_RANGES[key]
+
+        # clamp only to guarantee 0–1 range (mathematical requirement)
+        if v < fmin:
+            v = fmin
+        if v > fmax:
+            v = fmax
+
+        denom = (fmax - fmin) or 1.0
+        scaled.append((v - fmin) / denom)
+
+    return scaled
+
+
+# --------------------------------------------------------
+# Final profile returned for identity + compatibility
+# --------------------------------------------------------
+def build_music_profile(audio_features_list: list[dict]) -> dict[str, object]:
+    raw_means = _compute_raw_means(audio_features_list)
+    if not raw_means:
+        return {"raw": {}, "scaled": [], "labels": AUDIO_FEATURE_KEYS}
+
+    scaled = _scale_using_spotify_ranges(raw_means)
+
+    return {
+        "raw": raw_means,         # original musical identity values
+        "scaled": scaled,         # Spotify-normalized values in [0,1]
+        "labels": AUDIO_FEATURE_KEYS,
+    }
+
+
+
+# ----------------------------- CODE GRAVEYARD -----------------------------------
+# def _matrix_features_to_vector(
+#     audio_features_list: list[dict[str, float]]
+# ) -> list[float]:
+#     # math only; derived data only
+
+#     rows = []
+#     for feat in audio_features_list:
+#         if not isinstance(feat, dict):
+#             continue
+
+#         row = []
+#         for k in AUDIO_FEATURE_KEYS:
+#             v = feat.get(k)
+#             if v is None:
+#                 # You can choose a different fallback, but 0.0 is simple.
+#                 v = 0.0
+#             row.append(float(v))
+#         rows.append(row)
+
+#     if not rows:
+#         return []
+#     matrix = np.array(rows, dtype=float)
+#     mean_vector = matrix.mean(axis=0)
+#     return normalize_vector(mean_vector).tolist()
+
+# def _compute_feature_means(audio_features_list: list[dict]) -> dict[str, float]:
+#     """Return raw mean per feature in original units (derived, but not normalized)."""
+#     rows = []
+#     for feat in audio_features_list:
+#         row = []
+#         for k in AUDIO_FEATURE_KEYS:
+#             v = feat.get(k)
+#             if v is None:
+#                 v = 0.0
+#             row.append(float(v))
+#         rows.append(row)
+
+#     if not rows:
+#         return {}
+
+#     matrix = np.array(rows, dtype=float)
+#     mean_vector = matrix.mean(axis=0)
+#     return {
+#         key: float(val) for key, val in zip(AUDIO_FEATURE_KEYS, mean_vector)
+#     }
+
+
+# def _scale_means_to_unit_interval(raw_means: dict[str, float]) -> list[float]:
+#     """Scale each raw mean to [0,1] using FEATURE_RANGES."""
+#     scaled = []
+#     for key in AUDIO_FEATURE_KEYS:
+#         v = raw_means.get(key, 0.0)
+#         fmin, fmax = FEATURE_RANGES[key]
+#         # clamp
+#         if v < fmin:
+#             v = fmin
+#         if v > fmax:
+#             v = fmax
+#         denom = (fmax - fmin) or 1.0
+#         scaled.append((v - fmin) / denom)
+#     return scaled

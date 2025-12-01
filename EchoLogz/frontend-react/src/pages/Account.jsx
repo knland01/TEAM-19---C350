@@ -22,23 +22,51 @@ function Toast() {
     return <div id="toast" className={"toast" + (msg ? " show" : "")}>{msg}</div>;
     }
 
-      /* ---------- Account Components ---------- */
+/* ---------- Account Components ---------- */
 function AvatarUploader({ currentUrl }) {
     const [file, setFile] = useState(null);
+    // const [previewUrl, setPreviewUrl] = useState(
+    //     currentUrl || "https://via.placeholder.com/64"
+    // );
+    // // If currentUrl changes from the server, sync the preview
+    // useEffect(() => {
+    //     setPreviewUrl(currentUrl || "https://via.placeholder.com/64");
+    // }, [currentUrl]);
+
+    // const handleFileChange = (e) => {
+    //     const f = e.target.files?.[0] || null;
+    //     setFile(f);
+    //     if (f) {
+    //         const url = URL.createObjectURL(f);
+    //         setPreviewUrl(url);   // immediately show local preview
+    //     }
+    // };
     const upload = () => {
         if (!file) return;
         // TODO: POST /me/avatar
         UIFeedback.show("Avatar updated");
         setFile(null);
     };
+    const fileName = file?.name || "No file chosen";
     return (
         <div className="card panel">
         <h2>Avatar</h2>
-        <div className="row">
-            <img src={currentUrl || "https://via.placeholder.com/64"} width="64" height="64" style={{borderRadius:8}}/>
-            <input className="file input" type="file" accept="image/*" onChange={e=>setFile(e.target.files?.[0] || null)} />
-            <button className="btn secondary" onClick={upload} disabled={!file}>Upload</button>
-        </div>
+        <div className="row" style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+            <img src={currentUrl || "https://via.placeholder.com/64"} width="64" height="64" style={{borderRadius:8}} alt="Avatar preview"/>
+                <div className="file-input-wrapper">
+                    <span className="file-input-label">Choose File</span>
+                    <span className="file-input-name">{fileName}</span>
+                    <input
+                        type="file"
+                        accept="image/*"
+                        onChange={e => setFile(e.target.files?.[0] || null)}
+                    />
+                </div>
+
+                <button className="btn secondary" onClick={upload} disabled={!file}>
+                    Upload
+                </button>
+            </div>
         </div>
     );
 }
