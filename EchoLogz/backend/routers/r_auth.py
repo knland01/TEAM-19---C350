@@ -119,7 +119,7 @@ def signup(payload: UserCreate, background: BackgroundTasks, db: Session = Depen
     # Queue async email sending (this does NOT block)
     background.add_task(send_verification_email, user.email, verify_url)
     print("DEBUG: EMAIL VERIFY LINK -->", verify_url) # Temp --> replace with real email sending service pipeline
-    print(f"DEBUG: Verification link expires in {expires_in} minutes.")
+    # print(f"DEBUG: Verification link expires in {expires_in} minutes.")
     return {
         "user": UserOut.model_validate(user),
         "verify_token": verify_token,

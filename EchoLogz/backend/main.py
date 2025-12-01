@@ -2,14 +2,15 @@
 Main Application Entry Point
 
 This module initializes and runs the EchoLogz FastAPI backend.
-It handles the following core responsibilities:
 
-- Creates the FastAPI app instance with the project title.
+It handles the following core responsibilities:
 - Imports and initializes the database and ORM models.
 - Automatically creates database tables (if they don't already exist).
+- Creates the FastAPI app instance with the project title.
+- Configures CORS middleware for frontend-->backend local server communication during dev.
 - Defines basic API routes (starting with a simple root health check).
 
-NOTE: CORSMiddleware 
+DEEPDIVE: CORSMiddleware 
 # ... CORS: Allows communication btwn diff ports (frontend -> backend) - which is only issue during dev
 # ... FRONT-END (DEV): 127.0.0.1:5500 --> BACK-END (DEV): 127.0.0.1:8000
 # ... FRONT-END (DEPLOY): https://echologz(or whatever).com --> BACK-END (DEPLOY): https://echologz(or whatever)/api.com
@@ -18,25 +19,25 @@ NOTE: CORSMiddleware
 
  >>>> ACCESS HELP
 -----------------------------------------------------------------------------------------------------------------------
-BACKEND:
-    Run with Terminal Command:
-                (Navigate to: EchoLogz/)
-                uvicorn backend.main:app --reload
+BACKEND: Terminal 1
+    Run local server with Terminal Command:
+            (Navigate to --> EchoLogz/)
+                    uvicorn backend.main:app --reload
 
     Access the running server at: 
                 http://127.0.0.1:8000/
                 http://127.0.0.1:8000/docs <-- Swagger UI (FastAPI Interactive - API Documentation)
 -----------------------------------------------------------------------------------------------------------------------
-FRONTEND: 
-    Run with Terminal Command:
-                pnpm run dev
+FRONTEND: Terminal 2
+    Run local server with Terminal Command: 
+            (Navigate to --> frontend-react/)
+                    pnpm install <-- (first time only)
+                    pnpm run dev
+
     Access the running server at: 
                 http://localhost:5173
 -----------------------------------------------------------------------------------------------------------------------
 """
-
-# import sys, os
-# sys.path.insert(0, os.path.abspath(os.path.dirname(__file__) + "/../.."))
 
 # INTERNAL IMPORTS:
 from backend.echoDB import db_session, db_tables
@@ -51,7 +52,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.staticfiles import StaticFiles
 #----------------------------------------------------------------------------------------------
 
-# CREATE ALL DB TABLES IF THEY DON'T ALREADY EXIST IN: backend/data/echologz.db
+# AUTO-GENERATE: backend/data/echologz.db + TABLES (if they don't already exist)
 @asynccontextmanager
 async def lifespan(app: FastAPI): # Runs when the app starts
     print("LIFESPAN START: creating tables")
@@ -60,10 +61,10 @@ async def lifespan(app: FastAPI): # Runs when the app starts
     assert_schema_matches() # Run schema check
     yield # Runs when the app stops (if you need cleanup)
 
-
+# INSTANTIATE FASTAPI CLASS:
 app = FastAPI(title="EchoLogz API", lifespan=lifespan)
 # app.mount("/static", StaticFiles(directory="static"), name="static") 
-# Static file serving disabled (KL): No static assets needed—React frontend runs separately.
+# ---> Static file serving disabled (KL): No static assets needed—React frontend runs separately.
 
 # CORS CONFIG:
 app.add_middleware(
@@ -84,7 +85,7 @@ app.include_router(r_auth.router)
 app.include_router(r_spot_auth.router)
 app.include_router(r_users.router)
 app.include_router(r_match.router)
-# app.include_router(r_status.router)
+# app.include_router(r_status.router) # <--- currently unused, placeholder if needed
 
 # TEST ROUTE:
 @app.get("/")
@@ -92,7 +93,10 @@ def read_root():
     return {"message": "EchoLogz backend is running!"}
 
 
-# ----------- CODE GRAVEYARD -----------
+# ----------- CODE GRAVEYARD -----------------------------------------------------------------------
+# import sys, os
+# sys.path.insert(0, os.path.abspath(os.path.dirname(__file__) + "/../.."))
+
 # Ensure tables exist when the app starts
 # @app.on_event("startup") # deprecated ---> lifespan syntax (see below)
 # def on_startup():

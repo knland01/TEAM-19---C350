@@ -1,3 +1,12 @@
+/*
+MODULE: eslint.config.js 
+ESLint = code-quality checker for JavaScript and React. 
+ESLint scans all Javascipt and JSX files inside frontend-react (unless folder is explicitly ignored) - 
+Eslint looks for:
+----- Anything that violates rules defined in this module: 
+        --> ex: bugs, bad patterns, inconsistent style, unused variables, incorrect React Hook useage, missing imports, typos that break builds.
+*/
+
 import js from '@eslint/js'
 import globals from 'globals'
 import reactHooks from 'eslint-plugin-react-hooks'
