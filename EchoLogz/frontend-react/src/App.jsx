@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Routes, Route} from 'react-router-dom';
 import Navbar from './components/Navbar.jsx';
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
@@ -54,20 +54,48 @@ function EchoLogzMockup() {
     );
 }
 
+function loadStoredUser() {
+  try {
+    const raw = localStorage.getItem("echologz_user");
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!parsed || !parsed.accessToken) return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
 
 export default function App() {
     const [signedIn, setSignedIn] = useState(false);
-    const [user, setUser] = useState(null);
+    const [user, setUser] = useState(() => !!loadStoredUser());
+
+    // useEffect(() => {
+    //     const stored = localStorage.getItem("echologz_user");
+    //     if (stored) {
+    //         try {
+    //             const parsed = JSON.parse(stored);
+    //             if (parsed && parsed.accessToken) {
+    //                 setUser(parsed);
+    //                 setSignedIn(true);
+    //             }
+    //         } catch (e) {
+    //             console.error("Failed to parse stored user:", e);
+    //             localStorage.removeItem("echologz_user");
+    //         }
+    //     }
+    // }, []);
 
     function handleLoginSuccess(userData) {
         setSignedIn(true);
         setUser(userData);     // ex: { email, username, id, ... }
+        localStorage.setItem("echologz_user", JSON.stringify(userData));
     }
 
     function handleLogout() {
         setSignedIn(false);
         setUser(null);
-        // TODO: clear tokens/localStorage here (if needed)
+        localStorage.removeItem("echologz_user");
     }
 
     function connectSpotify(){
@@ -87,9 +115,10 @@ export default function App() {
             <Route path="/log_in" element={<Login onLoginSuccess={handleLoginSuccess} />} />
             <Route path="/account" element={<ProtectedRoute signedIn={signedIn}><Account signedIn={signedIn} user={user} onLogout={handleLogout} active="Account"/></ProtectedRoute>} />
             <Route path="/reset_password" element={<PasswordReset />} />
-            <Route path="/dashboard" element={<ProtectedRoute signedIn={signedIn}>
+            {/* <Route path="/dashboard" element={<ProtectedRoute signedIn={signedIn}>
                     <Index signedIn={signedIn} user={user} onLogout={handleLogout} active="Dashboard" connectSpotify={connectSpotify} 
-                /> </ProtectedRoute>} />
+                /> </ProtectedRoute>} /> */}
+            <Route path="/dashboard" element={<Index signedIn={signedIn} user={user} onLogout={handleLogout} active="Dashboard" connectSpotify={connectSpotify}/>}/>
             <Route path="/history" element={<ProtectedRoute signedIn={signedIn}><History signedIn={signedIn} user={user} onLogout={handleLogout} active="History" /></ProtectedRoute>} />
             <Route path="/reset_password" element={<PasswordReset />} />
             <Route path="/error" element={<Error />} />

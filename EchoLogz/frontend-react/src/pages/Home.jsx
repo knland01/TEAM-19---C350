@@ -34,7 +34,6 @@ export default function Home() {
               <br />and helps you find compatible matches through shared musical tastes.
               </p>
           </div>
-
           <button
               className="btn primary"
               style={{ 

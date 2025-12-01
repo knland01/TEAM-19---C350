@@ -78,6 +78,7 @@ from backend.echoDB.db_schemas import UserCreate, UserOut, TokenOut, SignupOut, 
 from backend.echoDB import db_crud
 from backend.core import security
 from backend.core.email_client import send_verification_email
+from backend.echoDB import db_tables
 
 
 # EXTERNAL MODULES: 
@@ -177,6 +178,10 @@ def verify_status(email: str, db: Session = Depends(get_db)):
     return {"is_verified": user.is_verified}
 
 # ===========================================================================================================
+
+
+
+
 
 @router.post("/resend-verification")
 def resend_verification(email: str, db: Session = Depends(get_db)):

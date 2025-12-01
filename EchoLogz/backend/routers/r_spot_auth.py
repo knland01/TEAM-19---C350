@@ -26,6 +26,7 @@ from backend.core.dependencies import get_db
 from backend.core.security import get_current_user
 from backend.echoDB import db_crud
 
+
 # EXTERNAL MODULES:
 from datetime import datetime, timedelta, timezone
 from fastapi import APIRouter, HTTPException, Depends, status
@@ -142,7 +143,16 @@ def spotify_callback(
     # return {"message": "Spotify connected"}
     return RedirectResponse("http://localhost:5173/dashboard")
 
-
+@router.get("/status")
+def spotify_status(
+    db: Session = Depends(get_db),
+    current_user: db_tables.User = Depends(get_current_user),
+):
+    """
+    Return whether the logged-in EchoLogz user has a SpotifyAccount row.
+    """
+    account = db_crud.get_spotify_account_by_user_id(db, user_id=current_user.id)
+    return {"connected": bool(account)}
 
 @router.post("/refresh")
 def refresh_token(refresh_token: str):

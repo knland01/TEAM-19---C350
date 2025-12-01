@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Navbar from "../components/Navbar.jsx";
 
 // Placeholder component
@@ -29,6 +29,32 @@ export default function Index({ signedIn, user, onLogout, active, connectSpotify
         }
         alert(`Submitted playlist: ${playlistUrl}`);
     };
+
+    useEffect(() => {
+        // only try if logged in and we have a token
+        if (!signedIn || !user?.accessToken) return;
+        const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+    async function fetchSpotifyStatus() {
+        try {
+            const resp = await fetch(`${API_BASE}/auth/spotify/status`, {
+                headers: {
+                    "Authorization": `Bearer ${user.accessToken}`,
+                    "Content-Type": "application/json",
+                },
+            });
+            if (!resp.ok) {
+                console.error("Failed to get Spotify status");
+                return;
+            }
+            const data = await resp.json();
+            setOauthConnected(data.connected);
+        } catch (err) {
+            console.error("Error checking Spotify status:", err);
+        }
+    }
+
+    fetchSpotifyStatus();
+}, [signedIn, user]);
 
     return (
         <>
@@ -76,9 +102,9 @@ export default function Index({ signedIn, user, onLogout, active, connectSpotify
                     <hr className="divider" />
 
                     <div className="music-panel">
-                        <div className="oauth-btn" onClick={connectSpotify}>
+                        <div className={`oauth-btn ${oauthConnected ? "connected" : ""}`} onClick={connectSpotify}>
                             <img src="https://storage.googleapis.com/pr-newsroom-wp/1/2023/05/Spotify_Primary_Logo_RGB_White.png" alt="Spotify" className="spotify-logo" />
-                            Connect with Spotify
+                            {oauthConnected ? "Spotify Connected" : "Connect with Spotify"}
                         </div>
 
                         <div className="or-separator">— OR —</div>
