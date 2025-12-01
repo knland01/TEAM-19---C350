@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Routes, Route} from 'react-router-dom';
 import SignUp from './pages/SignUp';
-// import Navbar from './components/Navbar.jsx';
+import Navbar from './components/Navbar.jsx';
 import './App.css';
 import Index from "./pages/Index.jsx";
 

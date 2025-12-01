@@ -46,6 +46,7 @@ from backend.routers import r_auth, r_spot_auth, r_match, r_users
 # from backend.core.config import settings # Load (.env) variables via config.py
 
 # EXTERNAL IMPORTS
+from pathlib import Path
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware 
@@ -56,11 +57,15 @@ from starlette.staticfiles import StaticFiles
 @asynccontextmanager
 async def lifespan(app: FastAPI): # Runs when the app starts
     print("LIFESPAN START: creating tables")
+    data_dir = Path("backend/data")
+    if not data_dir.exists():
+        print("Creating data directory:", data_dir)
+        data_dir.mkdir(parents=True, exist_ok=True)
     print("Tables in metadata:", db_tables.Base.metadata.tables.keys())
     db_tables.Base.metadata.create_all(bind=db_session.engine)
     assert_schema_matches() # Run schema check
     yield # Runs when the app stops (if you need cleanup)
-
+    print("LIFESPAN END")
 # INSTANTIATE FASTAPI CLASS:
 app = FastAPI(title="EchoLogz API", lifespan=lifespan)
 # app.mount("/static", StaticFiles(directory="static"), name="static") 
