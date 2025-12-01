@@ -7,7 +7,7 @@ function Placeholder({ label }) {
 }
 
 // Main Index component
-export default function Index() {
+export default function Index({ signedIn, user, onLogout, active }) {
     // Session state
     const [sessionCode, setSessionCode] = useState('');
     const [joined, setJoined] = useState(false);
@@ -37,7 +37,7 @@ export default function Index() {
 
     return (
         <>
-            <Navbar signedIn={signedIn} user={user} active="Dashboard" onLogout={onLogout} />
+            <Navbar signedIn={signedIn} user={user} active={active} onLogout={onLogout} />
         <div className="app">
             <aside className="panel">
                 <section className="create-join">

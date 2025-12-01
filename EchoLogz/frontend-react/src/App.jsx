@@ -53,7 +53,7 @@ function EchoLogzMockup() {
 
     return (
         <div className="app-container">
-            <Navbar signedIn={signedIn} username={username} />
+            <Navbar signedIn={signedIn} user={user} onLogout={handleLogout} />
             {/* ...rest of your JSX... */}
             {/* Keep all JSX from your EchoLogzMockup here */}
         </div>
@@ -80,10 +80,10 @@ export default function App() {
             <Route path="/" element={<Home signedIn={signedIn} />} />
             <Route path="/sign_up" element={<SignUp/>} />
             <Route path="/log_in" element={<Login onLoginSuccess={handleLoginSuccess} />} />
-            <Route path="/account" element={<ProtectedRoute signedIn={signedIn}><Account user={user} onLogout={handleLogout} /></ProtectedRoute>} />
+            <Route path="/account" element={<ProtectedRoute signedIn={signedIn}><Account signedIn={signedIn} user={user} onLogout={handleLogout} active="Account"/></ProtectedRoute>} />
             <Route path="/reset_password" element={<PasswordReset />} />
-            <Route path="/dashboard" element={<ProtectedRoute signedIn={signedIn}><Index user={user} onLogout={handleLogout} /></ProtectedRoute>} />
-            <Route path="/history" element={<ProtectedRoute signedIn={signedIn}><History user={user} onLogout={handleLogout} /></ProtectedRoute>} />
+            <Route path="/dashboard" element={<ProtectedRoute signedIn={signedIn}><Index signedIn={signedIn} user={user} onLogout={handleLogout} active="Dashboard" /></ProtectedRoute>} />
+            <Route path="/history" element={<ProtectedRoute signedIn={signedIn}><History signedIn={signedIn} user={user} onLogout={handleLogout} active="History" /></ProtectedRoute>} />
             <Route path="/reset_password" element={<PasswordReset />} />
             <Route path="/error" element={<Error />} />
             <Route path="*" element={<Error />} />

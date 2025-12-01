@@ -1,33 +1,22 @@
 // src/pages/History.jsx
 import React from "react";
+import Navbar from "../components/Navbar.jsx";
 import "../style_history.css";
 
-export default function History() {
+export default function History({ signedIn, user, onLogout, active }) {
   return (
-    <div className="wrap">
-      <div className="topbar">
-        <div className="brand">
-          <div className="logo">EL</div>
-          <div>
-            <div className="title">EchoLogz</div>
-            <div className="muted">History / Saved Comparisons</div>
-          </div>
-        </div>
-
-        <div className="controls">
-          <button className="btn">Dashboard</button>
-          <button className="btn">New Compare</button>
-          <button className="btn primary">Export CSV</button>
-        </div>
-      </div>
-
+    <>
+    <Navbar signedIn={signedIn} user={user} active={active} onLogout={onLogout} />
+        <div className="wrap">
+            <div className="topbar">
+                <div className="controls">
+                    <button className="btn">New Compare</button>
+                    <button className="btn primary">Export CSV</button>
+                </div>
+            </div>
       <div className="panel">
         <div className="filters">
-          <input
-            id="q"
-            className="input"
-            placeholder="Search user, tag, playlist…"
-          />
+          <input id="q" className="input" placeholder="Search user, tag, playlist…" />
           <select id="status">
             <option value="">All Status</option>
             <option value="ok">Complete</option>
@@ -139,5 +128,6 @@ export default function History() {
         </div>
       </aside>
     </div>
+    </>
   );
 }

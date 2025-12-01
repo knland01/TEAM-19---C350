@@ -148,7 +148,7 @@ function ConnectedAccounts({ accounts = [] }) {
 }
 
 /* ---------- Account Page (tabs) ---------- */
-export default function AccountPage() {
+export default function AccountPage({ signedIn, user, onLogout, active }) {
     // stubbed user; swap out once backend is wired
     const me = {
         name: "Karis",
@@ -169,7 +169,7 @@ export default function AccountPage() {
 
     return (
         <div className="app-container">
-        <Navbar signedIn={signedIn} user={user} active="Account" onLogout={onLogout} />
+        <Navbar signedIn={signedIn} user={user} active={active} onLogout={onLogout} />
         <div className="container">
             <div className="tabs" style={{marginTop:12}}>
             <TabLink id="profile">Profile</TabLink>

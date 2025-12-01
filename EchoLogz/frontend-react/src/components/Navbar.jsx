@@ -31,7 +31,7 @@ export default function Navbar({signedIn=false, user='', active='', onLogout = (
             <Link to="/dashboard" className={`nav-link ${active==="Dashboard"?"active":""}`}>Dashboard</Link>
             <Link to="/history" className={`nav-link ${active==="Saved"?"active":""}`}>History</Link>
             <Link to="/account" className={`nav-link ${active==="Account"?"active":""}`}>Account</Link>
-            <Link to="/log_in" className="nav-link signup">Log Out</Link>
+            {/* <Link to="/log_in" className="nav-link signup">Log Out</Link> */}
             <span className="nav-link" 
                 style={{ cursor: "pointer" }} 
                 onClick={onLogout}>
