@@ -34,7 +34,7 @@ export default function Navbar({signedIn=false, username='', active=''}) {
         ) : (
             <>
             <Link to="/log_in" className="nav-link">Log In</Link>
-            <a href="/sign_up" className="nav-link signup">Sign Up</a>
+            <Link to="/sign_up" className="nav-link signup">Sign Up</Link>
             </>
         )}
         </div>

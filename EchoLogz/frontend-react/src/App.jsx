@@ -5,6 +5,7 @@ import Navbar from './components/Navbar.jsx';
 import './App.css';
 import Index from "./pages/Index.jsx";
 import Login from "./pages/Login.jsx";
+import Home from "./pages/Home.jsx";
 
 function Placeholder({ label }) {
     return <div style={{ opacity: 0.9 }} className="muted">{label}</div>;
@@ -57,9 +58,10 @@ function EchoLogzMockup() {
 export default function App() {
     return <>
         <Routes>
-            <Route path="/" element={<Index/>} />
+            <Route path="/" element={<Home/>} />
             <Route path="/sign_up" element={<SignUp/>} />
             <Route path="/log_in" element={<Login/>} />
+            <Route path="/dashboard" element={<Index/>} />
         </Routes>
     </>;
 }
