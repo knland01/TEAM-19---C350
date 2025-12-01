@@ -35,7 +35,7 @@ INTERNAL IMPORTS (dependencies):
 # EXTERNAL IMPORTS:
 from datetime import datetime
 from pydantic import BaseModel, EmailStr, ConfigDict
-
+from typing import Dict, List
 
 # ---------- Inputs ----------------------------------------------------------------------------------------
 class UserCreate(BaseModel):
@@ -116,5 +116,6 @@ class SpotifyAccountUpdate(BaseModel):
 
 class IdentityResp(BaseModel):
     user_id: int
-    dimension: int
-    vector: list[float]
+    raw: Dict[str, float]
+    scaled: List[float]
+    labels: List[str]
