@@ -40,12 +40,6 @@ function EchoLogzMockup() {
         setJoined(true);
     }
 
-    function connectSpotify(){
-        // window.location.href="/auth/spotify/login"; <-- removed from original
-        setOauthConnected(true);
-        alert('[Spotify OAuth Placeholder]');
-    }
-
     function submitPlaylist(){
         if(!playlistUrl){ alert('[Submit Playlist Placeholder]'); return; }
         setJoined(true);
@@ -75,6 +69,17 @@ export default function App() {
         setUser(null);
         // TODO: clear tokens/localStorage here (if needed)
     }
+
+    function connectSpotify(){
+        const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+        const userId = user?.id;
+        if (!userId) {
+            console.error("No user id available for Spotify connect");
+            return;
+        }
+        window.location.href = `${API_BASE}/auth/spotify/login?user_id=${encodeURIComponent(userId)}`;
+    }
+
     return <>
         <Routes>
             <Route path="/" element={<Home signedIn={signedIn} />} />
@@ -82,7 +87,9 @@ export default function App() {
             <Route path="/log_in" element={<Login onLoginSuccess={handleLoginSuccess} />} />
             <Route path="/account" element={<ProtectedRoute signedIn={signedIn}><Account signedIn={signedIn} user={user} onLogout={handleLogout} active="Account"/></ProtectedRoute>} />
             <Route path="/reset_password" element={<PasswordReset />} />
-            <Route path="/dashboard" element={<ProtectedRoute signedIn={signedIn}><Index signedIn={signedIn} user={user} onLogout={handleLogout} active="Dashboard" /></ProtectedRoute>} />
+            <Route path="/dashboard" element={<ProtectedRoute signedIn={signedIn}>
+                    <Index signedIn={signedIn} user={user} onLogout={handleLogout} active="Dashboard" connectSpotify={connectSpotify} 
+                /> </ProtectedRoute>} />
             <Route path="/history" element={<ProtectedRoute signedIn={signedIn}><History signedIn={signedIn} user={user} onLogout={handleLogout} active="History" /></ProtectedRoute>} />
             <Route path="/reset_password" element={<PasswordReset />} />
             <Route path="/error" element={<Error />} />

@@ -7,7 +7,7 @@ function Placeholder({ label }) {
 }
 
 // Main Index component
-export default function Index({ signedIn, user, onLogout, active }) {
+export default function Index({ signedIn, user, onLogout, active, connectSpotify }) {
     // Session state
     const [sessionCode, setSessionCode] = useState('');
     const [joined, setJoined] = useState(false);
@@ -21,11 +21,6 @@ export default function Index({ signedIn, user, onLogout, active }) {
     const mockIdentityA = { name: 'You', features: ['Indie', 'Acoustic', 'Low Energy', 'Warm Keys'] };
     const mockIdentityB = { name: 'Match', features: ['Alt Rock', 'High Energy', 'Electronic', 'Danceable'] };
 
-    // Handlers
-    const connectSpotify = () => {
-        setOauthConnected(true);
-        alert('[Spotify OAuth Placeholder]');
-    };
 
     const submitPlaylist = () => {
         if (!playlistUrl) {

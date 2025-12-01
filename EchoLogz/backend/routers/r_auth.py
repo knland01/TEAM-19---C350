@@ -74,7 +74,7 @@ EXTERNAL IMPORTS (parts have been moved to security.py)
 
 # INTERNAL MODULES:
 from backend.core.dependencies import get_db
-from backend.echoDB.db_schemas import UserCreate, UserOut, TokenOut, SignupOut, LoginRequest
+from backend.echoDB.db_schemas import UserCreate, UserOut, TokenOut, SignupOut, LoginRequest, LoginOut
 from backend.echoDB import db_crud
 from backend.core import security
 from backend.core.email_client import send_verification_email
@@ -201,7 +201,7 @@ def resend_verification(email: str, db: Session = Depends(get_db)):
 
 # ===========================================================================================================
 
-@router.post("/login", response_model=TokenOut)
+@router.post("/login", response_model=LoginOut)
 # def login(form: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)): OAuth2 form expects a username
 def login(login: LoginRequest, db: Session = Depends(get_db)):
     """
@@ -232,7 +232,10 @@ def login(login: LoginRequest, db: Session = Depends(get_db)):
         )
     # Everything is correct --> JWT granted
     token = security._create_access_token(sub=user.email)
-    return TokenOut(access_token=token)
+    return LoginOut(
+    access_token=token,
+    user=user     # <- SQLAlchemy User model; Pydantic's from_attributes=True makes it work
+    )
 
 # ===========================================================================================================
 

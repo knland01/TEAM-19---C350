@@ -69,9 +69,10 @@ export default function Login({ onLoginSuccess }) { // exportable Login React co
         }
         const data = await resp.json(); // if resp.ok parse JSON = TokenOut {access_token, token_type}
         const userData = {
-            email,                     // already know the email
-            accessToken: data.access_token, // data sent from the backend
-            tokenType: data.token_type, // data sent from the backend
+            id: data.user.id,
+            email: data.user.email,
+            accessToken: data.access_token,
+            tokenType: data.token_type,
         };
         console.log("Login success:", data); // send dev message to console indicating success
         if (onLoginSuccess) {

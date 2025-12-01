@@ -40,7 +40,7 @@ router = APIRouter(prefix="/auth/spotify", tags=["spotify-auth"])
 SPOTIFY_CLIENT_ID = settings.SPOTIFY_CLIENT_ID
 SPOTIFY_CLIENT_SECRET = settings.SPOTIFY_CLIENT_SECRET
 SPOTIFY_REDIRECT_URI = settings.SPOTIFY_REDIRECT_URI  # e.g. http://localhost:8000/auth/spotify/callback
-SCOPES = "user-read-email playlist-read-private"
+SCOPES = "user-read-email playlist-read-private user-library-read user-top-read" # User data we want from Spotify
 
 
 # -------------------------------------------------------------------------
@@ -80,14 +80,15 @@ def get_current_spotify_account(db: Session = Depends(get_db),
     # .DELETE: "Remove this thing."
 
 @router.get("/login")
-def login_spotify():
+def login_spotify(user_id: int):
     params = {
         "client_id": SPOTIFY_CLIENT_ID,
         "response_type": "code",
         "redirect_uri": SPOTIFY_REDIRECT_URI,
         "scope": SCOPES,
+        "show_dialog": "true", # show new scopes
+        "state": str(user_id),
         # "state": "...",  # Optional: add CSRF protection
-        # "show_dialog": "true",
     }
     url = "https://accounts.spotify.com/authorize?" + urlencode(params)
     return RedirectResponse(url)
@@ -96,9 +97,19 @@ def login_spotify():
 @router.get("/callback")
 def spotify_callback(
     code: str,
+    state: str,
     db: Session = Depends(get_db),
-    current_user: db_tables.User = Depends(get_current_spotify_account),
-):
+    # current_user: db_tables.User = Depends(get_current_user)
+    ):
+    try:
+        user_id = int(state)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid state parameter")
+
+    current_user = db.query(db_tables.User).get(user_id)
+    if not current_user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
     token_url = "https://accounts.spotify.com/api/token"
     data = {
         "grant_type": "authorization_code",
@@ -118,17 +129,18 @@ def spotify_callback(
         headers={"Authorization": f"Bearer {access_token}"},
     ).json()
     spotify_user_id = me["id"]
-    expires_at = datetime.now(timezone.utc) + timedelta(seconds=expires_in)
+    expires_at = datetime.now(timezone.utc) + timedelta(seconds=expires_in) # convert access token expiration into a real time for refresh
     db_crud.create_or_update_spotify_account(
         db=db,
         user_id=current_user.id,
         spotify_user_id=spotify_user_id,
         access_token=access_token,
-        refresh_token=refresh_token,
+        refresh_token=refresh_token, # Used to refresh the short-lived access token
         expires_at=expires_at,
         scope=SCOPES,
     )
-    return {"message": "Spotify connected"}
+    # return {"message": "Spotify connected"}
+    return RedirectResponse("http://localhost:5173/dashboard")
 
 
 

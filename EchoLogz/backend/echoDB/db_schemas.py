@@ -77,6 +77,11 @@ class TokenOut(BaseModel):
     access_token: str
     token_type: str = "bearer"
 
+class LoginOut(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    user: UserOut
+
 
 # --------- SPOTIFY ----------------------------------------------------------------------------------------
 class SpotifyAccountBase(BaseModel):
