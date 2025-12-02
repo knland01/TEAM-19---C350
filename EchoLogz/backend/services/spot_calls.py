@@ -177,26 +177,54 @@ def get_user_top_artists(
 #     ids = ",".join(track_ids)
 #     return _get(f"/audio-features?ids={ids}", access_token)
 
+# def get_audio_features(access_token: str, track_ids: List[str]) -> Dict[str, Any]:
+#     """
+#     Fetches audio features for a list of track IDs using the
+#     NON-deprecated single-track endpoint `/audio-features/{id}`.
+
+#     Returns a dict with key "audio_features" to match the older shape.
+#     """
+#     features: List[Dict[str, Any]] = []
+
+#     # Optional: small chunking in case you ever bump this higher
+#     for tid in track_ids:
+#         if not tid:
+#             continue
+#         data = _get(f"/audio-features/{tid}", access_token)
+#         # Spotify returns a single feature object (or {}), not a list
+#         if data:
+#             features.append(data)
+
+#     return {"audio_features": features}
+
 def get_audio_features(access_token: str, track_ids: List[str]) -> Dict[str, Any]:
     """
-    Fetches audio features for a list of track IDs using the
-    NON-deprecated single-track endpoint `/audio-features/{id}`.
+    Fetch audio features for a list of track IDs using the batch endpoint.
 
-    Returns a dict with key "audio_features" to match the older shape.
+    Spotify endpoint:
+        GET /v1/audio-features?ids=ID1,ID2,...
+
+    Returns a dict with key "audio_features" so callers can do:
+        data = get_audio_features(...)
+        features = data.get("audio_features", [])
     """
-    features: List[Dict[str, Any]] = []
+    if not track_ids:
+        return {"audio_features": []}
 
-    # Optional: small chunking in case you ever bump this higher
-    for tid in track_ids:
-        if not tid:
-            continue
-        data = _get(f"/audio-features/{tid}", access_token)
-        # Spotify returns a single feature object (or {}), not a list
-        if data:
-            features.append(data)
+    # Spotify max is 100 per call; we’re using 50 already, but be safe
+    track_ids = track_ids[:10]
 
-    return {"audio_features": features}
+    ids_param = ",".join(track_ids)
 
+    data = _get(
+        "/audio-features",
+        access_token,
+        params={"ids": ids_param},
+    )
+
+    # Spotify should return {"audio_features": [...]} but be defensive
+    feats = data.get("audio_features") or []
+    return {"audio_features": feats}
 
 
 def refresh_access_token(refresh_token: str) -> tuple[str | None, datetime | None]:

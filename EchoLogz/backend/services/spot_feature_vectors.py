@@ -197,6 +197,7 @@ def build_feature_vector(db: Session, user_id: int, sample: str = "medium_term")
         limit=50
     )
     print(f"[IDENTITY] top tracks keys: {top_resp.keys() if top_resp else None}")
+    print(top_resp)
 
     items = top_resp.get("items", [])
     print(f"[IDENTITY] num top tracks returned: {len(items)}")

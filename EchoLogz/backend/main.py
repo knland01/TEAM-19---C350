@@ -52,7 +52,13 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware 
 from starlette.staticfiles import StaticFiles
+from fastapi import Request
+import json
 #----------------------------------------------------------------------------------------------
+
+
+
+
 
 # AUTO-GENERATE: backend/data/echologz.db + TABLES (if they don't already exist)
 @asynccontextmanager
@@ -98,6 +104,20 @@ app.include_router(r_match.router)
 def read_root():
     return {"message": "EchoLogz backend is running!"}
 
+
+
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    body = await request.body()
+    print("\n===== INCOMING REQUEST =====")
+    print("Method:", request.method)
+    print("URL:", request.url)
+    print("Headers:", dict(request.headers))
+    print("Body:", body.decode("utf-8"))
+    print("============================\n")
+    
+    response = await call_next(request)
+    return response
 
 # ----------- CODE GRAVEYARD -----------------------------------------------------------------------
 # import sys, os
