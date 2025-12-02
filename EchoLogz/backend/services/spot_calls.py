@@ -38,9 +38,32 @@ import requests                     # allows back-end to perform HTTP requests
 from typing import List, Dict, Any
 import os
 from datetime import datetime, timezone, timedelta
+import random
 
 BASE_URL = "https://api.spotify.com/v1" # when you have a valid token
 AUTH_BASE = "https://accounts.spotify.com/api" # when you need to refresh token
+
+# features that should be integers (inclusive ranges)
+_INT_FEATURES = {"mode", "key", "time_signature", "duration_ms"}
+
+SPOTIFY_FEATURE_RANGES = {
+    "acousticness":     (0.0, 1.0),
+    "danceability":     (0.0, 1.0),
+    "energy":           (0.0, 1.0),
+    "instrumentalness": (0.0, 1.0),
+    "liveness":         (0.0, 1.0),
+    "speechiness":      (0.0, 1.0),
+    "valence":          (0.0, 1.0),
+    "mode":             (0.0, 1.0),      # 0 or 1
+    "key":              (0.0, 11.0),     # 12 musical keys (0–11)
+    
+    # Spotify gives "typical working ranges"
+    "loudness":         (-60.0, 0.0),     # from API docs
+    "tempo":            (0.0, 250.0),     # Spotify docs say tempo rarely > 250 BPM
+    "duration_ms":      (0.0, 600000.0),  # rare to exceed 10 minutes, doc references
+    "time_signature":   (1.0, 7.0),       # Spotify says 3–7 are common, but 1–7 possible
+}
+
 
 def _auth_headers(access_token: str) -> Dict[str, str]:
     return {"Authorization": f"Bearer {access_token}"}
@@ -157,53 +180,97 @@ def get_user_top_artists(
         })
 
 
-
-def get_audio_features(access_token: str, track_ids: List[str]) -> Dict[str, Any]:
+def get_audio_features(
+    access_token: str,
+    track_ids: List[str],
+) -> Dict[str, Any]:
     """
-    Fetch audio features for a list of track IDs using the batch endpoint.
+    Low-level call to Spotify /audio-features endpoint.
 
-    Spotify endpoint:
-        GET /v1/audio-features?ids=ID1,ID2,...
+    Returns {"audio_features": [...]}.
 
-    Returns a dict with key "audio_features" so callers can do:
+    If Spotify fails or returns an empty list, falls back to
+    locally-generated fake features (same structure), so callers
+    can always do:
+
         data = get_audio_features(...)
-        features = data.get("audio_features", [])
+        feats = data.get("audio_features", [])
     """
     if not track_ids:
         return {"audio_features": []}
 
-    # Spotify max is 100 per call; we’re using 50 already, but be safe
+    # Spotify max is 100 per call; we’re using a smaller cap just in case
     track_ids = track_ids[:10]
-
     ids_param = ",".join(track_ids)
 
-    data = _get(
-        "/audio-features",
-        access_token,
-        params={"ids": ids_param},
+    try:
+        data = _get(
+            "/audio-features",
+            access_token,
+            params={"ids": ids_param},
+        )
+        feats = data.get("audio_features") or []
+
+        if feats:
+            return {"audio_features": feats}
+
+        print(
+            "[SPOTIFY] /audio-features returned an empty list; "
+            "falling back to fake features."
+        )
+
+    except Exception as exc:
+        # Network / HTTP / parsing issues, etc.
+        print(
+            f"[SPOTIFY] ERROR calling /audio-features: {exc}. "
+            "Falling back to fake features."
+        )
+
+    fake_feats = _generate_fake_audio_features(track_ids)
+    print(
+        f"[SPOTIFY] using FAKE audio features for "
+        f"{len(track_ids)} tracks."
     )
 
-    # Spotify should return {"audio_features": [...]} but be defensive
-    feats = data.get("audio_features") or []
-    return {"audio_features": feats}
+    return {"audio_features": fake_feats}
 
+def _rand_value(name: str, low: float, high: float) -> Any:
+    """Generate a random value for a single Spotify audio feature."""
+    if name == "mode":
+        # explicit: 0 or 1
+        return random.randint(0, 1)
 
-def get_audio_features_with_fallback(
-    access_token: str,
-    track_ids: List[str],
-) -> List[Dict[str, Any]]:
+    if name in {"key", "time_signature", "duration_ms"}:
+        return random.randint(int(low), int(high))
+
+    # all others are floats
+    return random.uniform(low, high)
+
+def _generate_fake_audio_features(track_ids: List[str],) -> List[Dict[str, Any]]:
     """
-    Try to get real Spotify audio features.
-    If anything goes wrong (network, auth, bad response),
-    fall back to randomly generated features in realistic ranges.
+    Mimic Spotify's /audio-features response for a list of track IDs,
+    using random values within documented ranges.
     """
-    try:
-        real_features = get_audio_features(access_token, track_ids)
-        return real_features
+    results: List[Dict[str, Any]] = []
 
-    except Exception as e:
-        print("Spotify audio-features failed, using fake data:", e)
-        return get_audio_features(track_ids)
+    for tid in track_ids:
+        feat: Dict[str, Any] = {"id": tid}
+
+        for name, (low, high) in SPOTIFY_FEATURE_RANGES.items():
+            feat[name] = _rand_value(name, low, high)
+
+        # optional extra fields if your code expects them
+        feat.setdefault("type", "audio_features")
+        feat.setdefault("uri", f"spotify:track:{tid}")
+        feat.setdefault("track_href", f"https://api.spotify.com/v1/tracks/{tid}")
+        feat.setdefault("analysis_url",
+                        f"https://api.spotify.com/v1/audio-analysis/{tid}")
+
+        results.append(feat)
+
+    return results
+
+
 
 
 
@@ -278,3 +345,51 @@ def refresh_access_token(refresh_token: str) -> tuple[str | None, datetime | Non
 #             features.append(data)
 
 #     return {"audio_features": features}
+
+
+# def get_audio_features(access_token: str, track_ids: List[str]) -> Dict[str, Any]:
+#     """
+#     Fetch audio features for a list of track IDs using the batch endpoint.
+
+#     Spotify endpoint:
+#         GET /v1/audio-features?ids=ID1,ID2,...
+
+#     Returns a dict with key "audio_features" so callers can do:
+#         data = get_audio_features(...)
+#         features = data.get("audio_features", [])
+#     """
+#     if not track_ids:
+#         return {"audio_features": []}
+
+#     # Spotify max is 100 per call; we’re using 50 already, but be safe
+#     track_ids = track_ids[:10]
+
+#     ids_param = ",".join(track_ids)
+
+#     data = _get(
+#         "/audio-features",
+#         access_token,
+#         params={"ids": ids_param},
+#     )
+
+#     # Spotify should return {"audio_features": [...]} but be defensive
+#     feats = data.get("audio_features") or []
+#     return {"audio_features": feats}
+
+
+# def get_audio_features_with_fallback(
+#     access_token: str,
+#     track_ids: List[str],
+# ) -> List[Dict[str, Any]]:
+#     """
+#     Try to get real Spotify audio features.
+#     If anything goes wrong (network, auth, bad response),
+#     fall back to randomly generated features in realistic ranges.
+#     """
+#     try:
+#         real_features = get_audio_features(access_token, track_ids)
+#         return real_features
+
+#     except Exception as e:
+#         print("Spotify audio-features failed, using fake data:", e)
+#         return get_audio_features(track_ids)

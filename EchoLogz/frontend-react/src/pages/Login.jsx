@@ -78,6 +78,7 @@ export default function Login({ onLoginSuccess }) { // exportable Login React co
         if (onLoginSuccess) {
             onLoginSuccess(userData); // flip signedin flag to true (in App.jsx)
         }// 
+        window.localStorage.setItem("user_id", String(userData.id));
         navigate("/dashboard"); // Redirect to dashboard (Index.jsx is mapped to "/")
 
         // TODO: store data.access_token = JWT (in localStorage or context ?)

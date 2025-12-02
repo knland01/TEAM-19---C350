@@ -34,7 +34,7 @@ INTERNAL IMPORTS (dependencies):
 
 # EXTERNAL IMPORTS:
 from datetime import datetime
-from pydantic import BaseModel, EmailStr, ConfigDict
+from pydantic import BaseModel, EmailStr, ConfigDict, Field
 from typing import Dict, List
 
 # ---------- Inputs ----------------------------------------------------------------------------------------
@@ -119,3 +119,8 @@ class IdentityResp(BaseModel):
     raw: Dict[str, float]
     scaled: List[float]
     labels: List[str]
+
+class CompareReq(BaseModel):
+    user_a_id: int = Field(ge=1)
+    user_b_id: int = Field(ge=1)
+    sample: str = Field(default="medium_term")

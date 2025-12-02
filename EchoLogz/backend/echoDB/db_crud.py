@@ -36,10 +36,12 @@ Typical Usage: SEE r_auth.get_current_user
 from backend.echoDB import db_tables
 from backend.echoDB import db_schemas as db_val
 from backend.core import security
+from backend.echoDB.db_tables import UserFeatureVector
 
 # EXTERNAL IMPORTS: 
 from sqlalchemy.orm import Session
 from datetime import datetime
+import json
 
 # ====================================================================================
 #          EchoLogz CRUD
@@ -145,3 +147,45 @@ def create_or_update_spotify_account(
     db.commit()
     db.refresh(account)
     return account
+
+# ====================================================================================
+#          Music ID CRUD
+# ====================================================================================
+
+def insert_user_feature_vector(
+    db: Session,
+    user_id: int,
+    feature_keys: list[str],
+    raw_values: list[float],
+    normalized_values: list[float],
+    vector_type: str = "top_tracks_50",
+) -> UserFeatureVector:
+    """
+    Create or update the canonical feature vector for a user.
+    """
+    if not (len(feature_keys) == len(raw_values) == len(normalized_values)):
+        raise ValueError("Feature vector lengths do not match")
+
+    vec = (
+        db.query(UserFeatureVector)
+        .filter(UserFeatureVector.user_id == user_id)
+        .one_or_none()
+    )
+
+    payload = {
+        "feature_keys": json.dumps(feature_keys),
+        "raw_values": json.dumps(raw_values),
+        "normalized_values": json.dumps(normalized_values),
+        "vector_type": vector_type,
+    }
+
+    if vec is None:
+        vec = UserFeatureVector(user_id=user_id, **payload)
+        db.add(vec)
+    else:
+        for k, v in payload.items():
+            setattr(vec, k, v)
+
+    db.commit()
+    db.refresh(vec)
+    return vec

@@ -117,7 +117,6 @@ def get_user_identity(
         user_id=user_id,
         sample=sample,
     )
-
     if not profile:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -127,10 +126,10 @@ def get_user_identity(
                 "sufficient listening data."
             ),
         )
-
     return IdentityResp(
         user_id=user_id,
         raw=profile["raw"],
         scaled=profile["scaled"],
         labels=profile["labels"],
     )
+

@@ -73,6 +73,9 @@ async def lifespan(app: FastAPI): # Runs when the app starts
     assert_schema_matches() # Run schema check
     yield # Runs when the app stops (if you need cleanup)
     print("LIFESPAN END")
+
+
+    
 # INSTANTIATE FASTAPI CLASS:
 app = FastAPI(title="EchoLogz API", lifespan=lifespan)
 # app.mount("/static", StaticFiles(directory="static"), name="static") 

@@ -35,9 +35,9 @@ WORK AROUND: Store Track IDs + URIs (this is ok)
 from backend.echoDB.db_session import Base
 
 # EXTERNAL IMPORTS:
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Boolean
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Boolean, Float, Text
 from sqlalchemy.orm import relationship
-
+from sqlalchemy.sql import func
 
 # =========================================================================
 #      EchoLogz User Table
@@ -55,6 +55,14 @@ class User(Base):
     spotify_accounts = relationship(
         "SpotifyAccount",
         back_populates="user",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+    )
+    # Optional: 0 or 1 canonical taste vector
+    feature_vector = relationship(
+        "UserFeatureVector",
+        back_populates="user",
+        uselist=False,                 # ← means at most one row
         cascade="all, delete-orphan",
         passive_deletes=True,
     )
@@ -122,4 +130,43 @@ class SpotifyAccount(Base):
     user = relationship(                                           # ORM relationship back to User
         "User",
         back_populates="spotify_accounts",
+    )
+
+# =========================================================================
+#      User Feature Vector (single canonical taste profile per member)
+# =========================================================================
+
+class UserFeatureVector(Base):
+    __tablename__ = "user_feature_vectors"
+    id = Column(Integer, primary_key=True, index=True)
+    # USER:
+    user_id = Column(
+        Integer,
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+        unique=True,     # 1 vector per user
+        index=True,
+    )
+    # top_tracks_50
+    vector_type = Column(String, nullable=False, default="top_tracks_50")
+    # JSON-encoded list of feature names
+    feature_keys = Column(Text, nullable=False)
+    # JSON-encoded list of raw values (floats) (idx = feature_keys)
+    raw_values = Column(Text, nullable=False)
+    # JSON-encoded list of normalized values (idx = feature_keys)
+    normalized_values = Column(Text, nullable=False)
+    created_at = Column(
+        DateTime,
+        nullable=False,
+        server_default=func.now(),
+    )
+    updated_at = Column(
+        DateTime,
+        nullable=False,
+        server_default=func.now(),
+        onupdate=func.now(),
+    )
+    user = relationship(
+        "User",
+        back_populates="feature_vector",
     )

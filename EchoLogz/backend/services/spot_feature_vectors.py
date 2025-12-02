@@ -53,7 +53,7 @@ IMPORTANT NOTE:
 """
 
 # INTERNAL IMPORTS:
-from . import spot_calls
+from backend.services import spot_calls
 from backend.echoDB import db_crud
 
 # EXTERNAL IMPORTS:
@@ -82,88 +82,66 @@ AUDIO_FEATURE_KEYS = [
     "time_signature",
 ]
 
-SPOTIFY_FEATURE_RANGES = {
-    "acousticness":     (0.0, 1.0),
-    "danceability":     (0.0, 1.0),
-    "energy":           (0.0, 1.0),
-    "instrumentalness": (0.0, 1.0),
-    "liveness":         (0.0, 1.0),
-    "speechiness":      (0.0, 1.0),
-    "valence":          (0.0, 1.0),
-    "mode":             (0.0, 1.0),      # 0 or 1
-    "key":              (0.0, 11.0),     # 12 musical keys (0–11)
-    
-    # Spotify gives "typical working ranges"
-    "loudness":         (-60.0, 0.0),     # from API docs
-    "tempo":            (0.0, 250.0),     # Spotify docs say tempo rarely > 250 BPM
-    "duration_ms":      (0.0, 600000.0),  # rare to exceed 10 minutes, doc references
-    "time_signature":   (1.0, 7.0),       # Spotify says 3–7 are common, but 1–7 possible
-}
+
+# def build_feature_vector(db: Session, user_id: int, sample: str = "medium_term") -> dict[str, object] | None:
+#     # DB + Spotify + high-level orchestration
+#     """
+#     Return FULL music profile containing:
+#       - raw feature means (real units)
+#       - scaled feature vector in [0,1]
+#       - labels aligned to the vector
+#     """
+#     # Step 1: Lookup EchoLogz user (assumes valid user_id given)
+#     user = db_crud.get_user_by_id(db, user_id)
+#     if not user:
+#         return None
+
+#     # Step 2: Lookup Spotify link
+#     spotify_account = db_crud.get_spotify_account_by_user_id(db, user_id)
+#     if not spotify_account or not spotify_account.access_token:
+#         return None
+
+#     # Step 3: Token lifecycle management
+#     if _token_is_expired(spotify_account):
+#         new_token, new_expiry = spot_calls.refresh_access_token(
+#             spotify_account.refresh_token
+#         )
+
+#         if not new_token or not new_expiry:
+#             # refresh failed
+#             return None
+
+#         spotify_account.access_token = new_token
+#         spotify_account.expires_at   = new_expiry
+#         db.commit()
 
 
-# features that should be integers (inclusive ranges)
-_INT_FEATURES = {"mode", "key", "time_signature", "duration_ms"}
+#     access_token = spotify_account.access_token
 
-def build_feature_vector(db: Session, user_id: int, sample: str = "medium_term") -> dict[str, object] | None:
-    # DB + Spotify + high-level orchestration
-    """
-    Return FULL music profile containing:
-      - raw feature means (real units)
-      - scaled feature vector in [0,1]
-      - labels aligned to the vector
-    """
-    # Step 1: Lookup EchoLogz user (assumes valid user_id given)
-    user = db_crud.get_user_by_id(db, user_id)
-    if not user:
-        return None
+#     # Step 4: Get Spotify tracks for the user (top tracks JSON → IDs)
+#     top_resp = spot_calls.get_user_top_tracks(
+#         access_token,
+#         time_range=sample,
+#         limit=50
+#     )
+#     items = top_resp.get("items", [])
+#     track_ids = [
+#         t["id"] for t in items
+#         if isinstance(t, dict) and t.get("id")
+#     ]
+#     if not track_ids:
+#         return None
 
-    # Step 2: Lookup Spotify link
-    spotify_account = db_crud.get_spotify_account_by_user_id(db, user_id)
-    if not spotify_account or not spotify_account.access_token:
-        return None
+#     # Step 5: Get audio features
+#     raw_features = spot_calls.get_audio_features(access_token, track_ids)
+#     audio_features = raw_features.get("audio_features") or []
+#     if not audio_features:
+#         return None
 
-    # Step 3: Token lifecycle management
-    if _token_is_expired(spotify_account):
-        new_token, new_expiry = spot_calls.refresh_access_token(
-            spotify_account.refresh_token
-        )
+#     # Step 6–7: Build profile and return raw and scaled vector
+#     music_profile = build_music_profile(audio_features)
 
-        if not new_token or not new_expiry:
-            # refresh failed
-            return None
-
-        spotify_account.access_token = new_token
-        spotify_account.expires_at   = new_expiry
-        db.commit()
-
-
-    access_token = spotify_account.access_token
-
-    # Step 4: Get Spotify tracks for the user (top tracks JSON → IDs)
-    top_resp = spot_calls.get_user_top_tracks(
-        access_token,
-        time_range=sample,
-        limit=50
-    )
-    items = top_resp.get("items", [])
-    track_ids = [
-        t["id"] for t in items
-        if isinstance(t, dict) and t.get("id")
-    ]
-    if not track_ids:
-        return None
-
-    # Step 5: Get audio features
-    raw_features = spot_calls.get_audio_features(access_token, track_ids)
-    audio_features = raw_features.get("audio_features") or []
-    if not audio_features:
-        return None
-
-    # Step 6–7: Build profile and return raw and scaled vector
-    music_profile = build_music_profile(audio_features)
-
-
-    return music_profile
+#     return music_profile
 
 def build_feature_vector(db: Session, user_id: int, sample: str = "medium_term"):
     print(f"[IDENTITY] start: user_id={user_id}")
@@ -225,8 +203,25 @@ def build_feature_vector(db: Session, user_id: int, sample: str = "medium_term")
         return None
 
     print("[IDENTITY] SUCCESS: building music profile")
-    return build_music_profile(audio_features)
+    # Convert audio_features ⇒ feature_keys, raw_values, normalized_values
+    # feature_keys, raw_values, normalized_values = build_music_profile(audio_features)
+    profile = build_music_profile(audio_features)
+    labels = profile["labels"]
+    raw    = profile["raw"]
+    scaled = profile["scaled"]
+    # Write to DB (insert or update)
+    vec = db_crud.insert_user_feature_vector(
+        db=db,
+        user_id=user_id,
+        feature_keys=labels,
+        raw_values=raw,
+        normalized_values=scaled,
+        vector_type="top_tracks_50",
+    )
 
+    print(f"[IDENTITY] STORED UserFeatureVector id={vec.id} for user_id={user_id}")
+    # RETURN VECTOR AS DICT:
+    return profile
 
 
 def _token_is_expired(spotify_account) -> bool:
@@ -250,43 +245,6 @@ def _token_is_expired(spotify_account) -> bool:
 # ================================================================================
 
 
-def _rand_value(name: str, low: float, high: float) -> Any:
-    """Generate a random value for a single Spotify audio feature."""
-    if name == "mode":
-        # explicit: 0 or 1
-        return random.randint(0, 1)
-
-    if name in {"key", "time_signature", "duration_ms"}:
-        return random.randint(int(low), int(high))
-
-    # all others are floats
-    return random.uniform(low, high)
-
-def generate_fake_audio_features(
-    track_ids: List[str],
-) -> List[Dict[str, Any]]:
-    """
-    Mimic Spotify's /audio-features response for a list of track IDs,
-    using random values within documented ranges.
-    """
-    results: List[Dict[str, Any]] = []
-
-    for tid in track_ids:
-        feat: Dict[str, Any] = {"id": tid}
-
-        for name, (low, high) in SPOTIFY_FEATURE_RANGES.items():
-            feat[name] = _rand_value(name, low, high)
-
-        # optional extra fields if your code expects them
-        feat.setdefault("type", "audio_features")
-        feat.setdefault("uri", f"spotify:track:{tid}")
-        feat.setdefault("track_href", f"https://api.spotify.com/v1/tracks/{tid}")
-        feat.setdefault("analysis_url",
-                        f"https://api.spotify.com/v1/audio-analysis/{tid}")
-
-        results.append(feat)
-
-    return results
 
 
 # --------------------------------------------------------
@@ -319,7 +277,7 @@ def _scale_using_spotify_ranges(raw: dict[str, float]) -> list[float]:
     scaled = []
     for key in AUDIO_FEATURE_KEYS:
         v = raw.get(key, 0.0)
-        fmin, fmax = SPOTIFY_FEATURE_RANGES[key]
+        fmin, fmax = spot_calls.SPOTIFY_FEATURE_RANGES[key]
 
         # clamp only to guarantee 0–1 range (mathematical requirement)
         if v < fmin:

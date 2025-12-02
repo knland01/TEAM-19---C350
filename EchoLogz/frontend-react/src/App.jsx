@@ -68,7 +68,9 @@ function loadStoredUser() {
 }
 
 export default function App() {
-    const [signedIn, setSignedIn] = useState(false);
+    // const [signedIn, setSignedIn] = useState(false);
+    // const [user, setUser] = useState(null);
+    const [signedIn, setSignedIn] = useState(() => !!loadStoredUser());
     const [user, setUser] = useState(() => !!loadStoredUser());
     // const [sessionCode, setSessionCode] = useState('');
     // const [playlistUrl, setPlaylistUrl] = useState('');
@@ -80,6 +82,7 @@ export default function App() {
         setSignedIn(true);
         setUser(userData);     // ex: { email, username, id, ... }
         localStorage.setItem("echologz_user", JSON.stringify(userData));
+        console.log("USER DATA AFTER LOGIN:", userData);
     }
 
     function handleLogout() {
@@ -112,7 +115,7 @@ export default function App() {
                 /> </ProtectedRoute>} /> */}
             <Route path="/dashboard" element={<Index signedIn={signedIn} user={user} onLogout={handleLogout} active="Dashboard" connectSpotify={connectSpotify}/>}/>
             <Route path="/history" element={<ProtectedRoute signedIn={signedIn}><History signedIn={signedIn} user={user} onLogout={handleLogout} active="History" /></ProtectedRoute>} />
-            <Route path="/music-identity" element={<MusicID user={user} active="MusicID" />} />
+            <Route path="/music-identity" element={<MusicID signedIn={signedIn} user={user} onLogout={handleLogout} active="MusicID" connectSpotify={connectSpotify} />} />
             <Route path="/reset_password" element={<PasswordReset />} />
             <Route path="/error" element={<Error />} />
             <Route path="*" element={<Error />} />
