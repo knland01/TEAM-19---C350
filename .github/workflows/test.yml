@@ -22,11 +22,11 @@ jobs:
 
       - name: Install frontend dependencies
         run: pnpm install
-        working-directory: ./EchoLogz/frontend-react
+        working-directory: EchoLogz/frontend-react
 
       - name: Run frontend tests
         run: pnpm test
-        working-directory: ./EchoLogz/frontend-react
+        working-directory: EchoLogz/frontend-react
 
   backend-tests:
     name: Backend Tests
