@@ -1,10 +1,10 @@
-name: CI
+name: ContinuousIntegration
 
 on:
   push:
-    branches: [ main ]
+    branches: [ master ]
   pull_request:
-    branches: [ main ]
+    branches: [ master ]
 
 jobs:
   frontend-tests:
@@ -21,11 +21,11 @@ jobs:
           node-version: 20
 
       - name: Install frontend dependencies
-        run: npm install
+        run: pnpm install
         working-directory: ./EchoLogz/frontend-react
 
       - name: Run frontend tests
-        run: npm test
+        run: pnpm test
         working-directory: ./EchoLogz/frontend-react
 
   backend-tests:
