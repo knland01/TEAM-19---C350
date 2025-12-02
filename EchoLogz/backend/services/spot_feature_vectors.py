@@ -57,6 +57,8 @@ from . import spot_calls
 from backend.echoDB import db_crud
 
 # EXTERNAL IMPORTS:
+import random
+from typing import Any, Dict, List
 from sqlalchemy.orm import Session
 import numpy as np
 from datetime import datetime, timezone
@@ -98,6 +100,9 @@ SPOTIFY_FEATURE_RANGES = {
     "time_signature":   (1.0, 7.0),       # Spotify says 3–7 are common, but 1–7 possible
 }
 
+
+# features that should be integers (inclusive ranges)
+_INT_FEATURES = {"mode", "key", "time_signature", "duration_ms"}
 
 def build_feature_vector(db: Session, user_id: int, sample: str = "medium_term") -> dict[str, object] | None:
     # DB + Spotify + high-level orchestration
@@ -243,6 +248,45 @@ def _token_is_expired(spotify_account) -> bool:
 # ================================================================================
 #         MATH ONLY HELPERS
 # ================================================================================
+
+
+def _rand_value(name: str, low: float, high: float) -> Any:
+    """Generate a random value for a single Spotify audio feature."""
+    if name == "mode":
+        # explicit: 0 or 1
+        return random.randint(0, 1)
+
+    if name in {"key", "time_signature", "duration_ms"}:
+        return random.randint(int(low), int(high))
+
+    # all others are floats
+    return random.uniform(low, high)
+
+def generate_fake_audio_features(
+    track_ids: List[str],
+) -> List[Dict[str, Any]]:
+    """
+    Mimic Spotify's /audio-features response for a list of track IDs,
+    using random values within documented ranges.
+    """
+    results: List[Dict[str, Any]] = []
+
+    for tid in track_ids:
+        feat: Dict[str, Any] = {"id": tid}
+
+        for name, (low, high) in SPOTIFY_FEATURE_RANGES.items():
+            feat[name] = _rand_value(name, low, high)
+
+        # optional extra fields if your code expects them
+        feat.setdefault("type", "audio_features")
+        feat.setdefault("uri", f"spotify:track:{tid}")
+        feat.setdefault("track_href", f"https://api.spotify.com/v1/tracks/{tid}")
+        feat.setdefault("analysis_url",
+                        f"https://api.spotify.com/v1/audio-analysis/{tid}")
+
+        results.append(feat)
+
+    return results
 
 
 # --------------------------------------------------------
