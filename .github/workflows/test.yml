@@ -49,4 +49,5 @@ jobs:
 
       - name: Run backend tests
         run: |
-          pytest EchoLogz/tests
+          cd EchoLogz
+          PYTHONPATH=. pytest tests
