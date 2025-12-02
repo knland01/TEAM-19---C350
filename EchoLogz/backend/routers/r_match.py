@@ -102,25 +102,35 @@ def post_compare(req: CompareReq, db: Session = Depends(get_db)):
 def get_user_identity(
     user_id: int,
     sample: str = "medium_term",
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """
-    Return the user's derived musical identity vector.
-    This calls build_feature_vector() and returns ONLY numeric data.
-    """
+    Return the user's derived musical identity profile.
 
-    vec = build_feature_vector(
+    Uses Spotify audio_features for the user's top tracks and returns:
+      - raw feature means (real units)
+      - scaled feature vector in [0,1]
+      - labels (feature names)
+    """
+    profile = build_feature_vector(
         db=db,
         user_id=user_id,
         sample=sample,
     )
 
-    if not vec:
+    if not profile:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Unable to compute musical identity. "
-                   "User may not have Spotify connected "
-                   "or lacks sufficient listening data."
+            detail=(
+                "Unable to compute musical identity. "
+                "User may not have Spotify connected or lacks "
+                "sufficient listening data."
+            ),
         )
 
-    return IdentityResp(user_id=user_id,dimension=len(vec),vector=vec)
+    return IdentityResp(
+        user_id=user_id,
+        raw=profile["raw"],
+        scaled=profile["scaled"],
+        labels=profile["labels"],
+    )

@@ -61,6 +61,7 @@ from sqlalchemy.orm import Session
 import numpy as np
 from datetime import datetime, timezone
 from backend.services.utils import normalize_vector
+from datetime import timedelta
 
 # Ordered list of keys that define our feature vector
 AUDIO_FEATURE_KEYS = [
@@ -112,18 +113,24 @@ def build_feature_vector(db: Session, user_id: int, sample: str = "medium_term")
         return None
 
     # Step 2: Lookup Spotify link
-    spotify_account = db_crud.get_spotify_account(db, user_id)
+    spotify_account = db_crud.get_spotify_account_by_user_id(db, user_id)
     if not spotify_account or not spotify_account.access_token:
         return None
 
     # Step 3: Token lifecycle management
     if _token_is_expired(spotify_account):
-        new_token, new_expiry = spot_calls.refresh_access_token(spotify_account.refresh_token)
-        if not new_token:
+        new_token, new_expiry = spot_calls.refresh_access_token(
+            spotify_account.refresh_token
+        )
+
+        if not new_token or not new_expiry:
+            # refresh failed
             return None
+
         spotify_account.access_token = new_token
-        spotify_account.token_expires_at = new_expiry
+        spotify_account.expires_at   = new_expiry
         db.commit()
+
 
     access_token = spotify_account.access_token
 
@@ -153,10 +160,83 @@ def build_feature_vector(db: Session, user_id: int, sample: str = "medium_term")
 
     return music_profile
 
+def build_feature_vector(db: Session, user_id: int, sample: str = "medium_term"):
+    print(f"[IDENTITY] start: user_id={user_id}")
+
+    user = db_crud.get_user_by_id(db, user_id)
+    print(f"[IDENTITY] user found? {bool(user)}")
+    if not user:
+        print("[IDENTITY] FAIL: user not found")
+        return None
+
+    spotify_account = db_crud.get_spotify_account_by_user_id(db, user_id)
+    print(f"[IDENTITY] spotify account? {bool(spotify_account)}")
+    if not spotify_account:
+        print("[IDENTITY] FAIL: no spotify account in DB")
+        return None
+
+    print(f"[IDENTITY] access_token exists? {bool(spotify_account.access_token)}")
+    print(f"[IDENTITY] expires_at={spotify_account.expires_at}")
+
+    if _token_is_expired(spotify_account):
+        print("[IDENTITY] token expired → attempting refresh")
+        new_token, new_expiry = spot_calls.refresh_access_token(
+            spotify_account.refresh_token
+        )
+        if not new_token or not new_expiry:
+            # refresh failed
+            return None
+        spotify_account.access_token = new_token
+        spotify_account.expires_at   = new_expiry
+        db.commit()
+    else:
+        print("[IDENTITY] token OK")
+
+    top_resp = spot_calls.get_user_top_tracks(spotify_account.access_token, 
+        time_range=sample,
+        limit=50
+    )
+    print(f"[IDENTITY] top tracks keys: {top_resp.keys() if top_resp else None}")
+
+    items = top_resp.get("items", [])
+    print(f"[IDENTITY] num top tracks returned: {len(items)}")
+
+    track_ids = [t["id"] for t in items if isinstance(t, dict) and t.get("id")]
+    print(f"[IDENTITY] num track_ids extracted: {len(track_ids)}")
+
+    if not track_ids:
+        print("[IDENTITY] FAIL: no track IDs returned")
+        return None
+
+    raw_features = spot_calls.get_audio_features(spotify_account.access_token, track_ids)
+    print(f"[IDENTITY] audio_features top-level keys: {raw_features.keys() if raw_features else None}")
+
+    audio_features = raw_features.get("audio_features") or []
+    print(f"[IDENTITY] num audio_features returned: {len(audio_features)}")
+
+    if not audio_features:
+        print("[IDENTITY] FAIL: Spotify returned NO audio features")
+        return None
+
+    print("[IDENTITY] SUCCESS: building music profile")
+    return build_music_profile(audio_features)
+
 
 
 def _token_is_expired(spotify_account) -> bool:
-    return spotify_account.token_expires_at < datetime.now(timezone.utc)
+    expires_at = spotify_account.expires_at
+    if not expires_at:
+        return False
+
+    # If the datetime is naive, treat it as UTC (because saved as UTC)
+    if expires_at.tzinfo is None:
+        expires_at = expires_at.replace(tzinfo=timezone.utc) 
+        # ... SQLite strips the timezone on retrieval --- here it is added back in for comparison
+
+    now = datetime.now(timezone.utc)
+    return expires_at < now
+
+
 
 
 # ================================================================================
@@ -227,6 +307,10 @@ def build_music_profile(audio_features_list: list[dict]) -> dict[str, object]:
 
 
 # ----------------------------- CODE GRAVEYARD -----------------------------------
+# def _token_is_expired(spotify_account) -> bool:
+#     return spotify_account.expires_at < datetime.now(timezone.utc)
+
+
 # def _matrix_features_to_vector(
 #     audio_features_list: list[dict[str, float]]
 # ) -> list[float]:

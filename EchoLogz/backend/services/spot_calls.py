@@ -30,11 +30,17 @@ Modules using spot_calls.py:
 _______________________________________
 """
 
+#INTERNAL IMPORTS:
+from backend.core.config import settings
+
 # EXTERNAL IMPORTS:
 import requests                     # allows back-end to perform HTTP requests
 from typing import List, Dict, Any
+import os
+from datetime import datetime, timezone, timedelta
 
-BASE_URL = "https://api.spotify.com/v1"
+BASE_URL = "https://api.spotify.com/v1" # when you have a valid token
+AUTH_BASE = "https://accounts.spotify.com/api" # when you need to refresh token
 
 def _auth_headers(access_token: str) -> Dict[str, str]:
     return {"Authorization": f"Bearer {access_token}"}
@@ -152,21 +158,68 @@ def get_user_top_artists(
 
 # NOTE: This API endpoint is depricated according to Spotify Docs.
 # https://developer.spotify.com/documentation/web-api/reference/get-several-audio-features
+# def get_audio_features(access_token: str, track_ids: List[str]) -> Dict[str, Any]:
+#     """
+#     Fetches audio features for a list of track IDs.
+#     Args:
+#         access_token (str): A valid Spotify OAuth access token.
+#         track_ids (List[str]): A list of Spotify track IDs.
+#     Returns:
+#         Dict[str, Any]: Audio features data for the specified tracks.
+#     Raises:
+#         ValueError: If `track_ids` has more than 100 items.
+#     """
+#     if len(track_ids) > 100:
+#         raise ValueError(
+#             f"Spotify API supports a maximum of 100 track IDs per request, "
+#             f"but {len(track_ids)} were provided."
+#         )
+#     ids = ",".join(track_ids)
+#     return _get(f"/audio-features?ids={ids}", access_token)
+
 def get_audio_features(access_token: str, track_ids: List[str]) -> Dict[str, Any]:
     """
-    Fetches audio features for a list of track IDs.
-    Args:
-        access_token (str): A valid Spotify OAuth access token.
-        track_ids (List[str]): A list of Spotify track IDs.
-    Returns:
-        Dict[str, Any]: Audio features data for the specified tracks.
-    Raises:
-        ValueError: If `track_ids` has more than 100 items.
+    Fetches audio features for a list of track IDs using the
+    NON-deprecated single-track endpoint `/audio-features/{id}`.
+
+    Returns a dict with key "audio_features" to match the older shape.
     """
-    if len(track_ids) > 100:
-        raise ValueError(
-            f"Spotify API supports a maximum of 100 track IDs per request, "
-            f"but {len(track_ids)} were provided."
-        )
-    ids = ",".join(track_ids)
-    return _get(f"/audio-features?ids={ids}", access_token)
+    features: List[Dict[str, Any]] = []
+
+    # Optional: small chunking in case you ever bump this higher
+    for tid in track_ids:
+        if not tid:
+            continue
+        data = _get(f"/audio-features/{tid}", access_token)
+        # Spotify returns a single feature object (or {}), not a list
+        if data:
+            features.append(data)
+
+    return {"audio_features": features}
+
+
+
+def refresh_access_token(refresh_token: str) -> tuple[str | None, datetime | None]:
+    client_id = settings.SPOTIFY_CLIENT_ID
+    client_secret = settings.SPOTIFY_CLIENT_SECRET
+
+    payload = {
+        "grant_type": "refresh_token",
+        "refresh_token": refresh_token,
+    }
+    resp = requests.post(
+        f"{AUTH_BASE}/token",
+        data=payload,
+        auth=(client_id, client_secret),
+    )
+    try:
+        resp.raise_for_status()
+    except requests.RequestException:
+        return None, None
+
+    data = resp.json()
+    new_access = data.get("access_token")
+    expires_in = data.get("expires_in", 3600)
+    new_expiry = datetime.now(timezone.utc) + timedelta(seconds=expires_in)
+
+    return new_access, new_expiry

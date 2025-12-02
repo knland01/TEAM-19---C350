@@ -11,6 +11,7 @@ import Account from "./pages/Account.jsx";
 import PasswordReset from "./pages/PasswordReset.jsx";
 import History from "./pages/History.jsx";
 import Error from "./pages/Error.jsx";
+import MusicID from "./pages/MusicID.jsx";
 
 
 function Placeholder({ label }) {
@@ -111,6 +112,7 @@ export default function App() {
                 /> </ProtectedRoute>} /> */}
             <Route path="/dashboard" element={<Index signedIn={signedIn} user={user} onLogout={handleLogout} active="Dashboard" connectSpotify={connectSpotify}/>}/>
             <Route path="/history" element={<ProtectedRoute signedIn={signedIn}><History signedIn={signedIn} user={user} onLogout={handleLogout} active="History" /></ProtectedRoute>} />
+            <Route path="/music-identity" element={<MusicID user={user} active="MusicID" />} />
             <Route path="/reset_password" element={<PasswordReset />} />
             <Route path="/error" element={<Error />} />
             <Route path="*" element={<Error />} />
