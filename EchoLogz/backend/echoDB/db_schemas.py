@@ -34,7 +34,7 @@ INTERNAL IMPORTS (dependencies):
 
 # EXTERNAL IMPORTS:
 from datetime import datetime
-from pydantic import BaseModel, EmailStr, ConfigDict
+from pydantic import BaseModel, EmailStr, ConfigDict, field_validator
 from typing import Dict, List
 
 # ---------- Inputs ----------------------------------------------------------------------------------------
@@ -44,15 +44,29 @@ class UserCreate(BaseModel):
     password: str
     # username: str | None = None
 
+    @field_validator("email")
+    def normalize_email(cls, v: EmailStr) -> str:
+        """Ensure email is lowercase to avoid duplicates."""
+        return v.lower()
+
 class UserUpdate(BaseModel):
     """Validates schema for updating user accounts."""
     email: EmailStr | None = None 
     password: str | None = None
     # username: str | None = None
+    @field_validator("email")
+    def normalize_email(cls, v: EmailStr) -> str:
+        """Ensure email is lowercase to avoid duplicates."""
+        return v.lower()
 
 class LoginRequest(BaseModel):
     email: EmailStr
     password: str
+
+    @field_validator("email")
+    def normalize_email(cls, v: EmailStr) -> str:
+        """Ensure email is lowercase to avoid duplicates."""
+        return v.lower()
 
 # ---------- Outputs ----------------------------------------------------------------------------------------
 
