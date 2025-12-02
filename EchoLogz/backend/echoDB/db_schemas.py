@@ -35,7 +35,7 @@ INTERNAL IMPORTS (dependencies):
 # EXTERNAL IMPORTS:
 from datetime import datetime
 from pydantic import BaseModel, EmailStr, ConfigDict, Field
-from typing import Dict, List
+from typing import Dict, List, Any
 
 # ---------- Inputs ----------------------------------------------------------------------------------------
 class UserCreate(BaseModel):
@@ -124,3 +124,16 @@ class CompareReq(BaseModel):
     user_a_id: int = Field(ge=1)
     user_b_id: int = Field(ge=1)
     sample: str = Field(default="medium_term")
+
+class RandomMatchResp(BaseModel):
+    name: str
+    score: float
+    profile: Dict[str, Any]      # synthetic partner profile
+
+class RandomMatchResp(BaseModel):
+    name: str
+    score: float
+    profile: Dict[str, Any]
+
+# class RandomReq(BaseModel):
+#     user_id: int = Field(ge=1)

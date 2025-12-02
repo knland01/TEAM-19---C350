@@ -27,9 +27,13 @@ Modules using dependencies.py
 - r_users.py
 __________________________________________________
 """
-
+from backend.core.config import settings
 from backend.echoDB.db_session import SessionLocal
 
+from fastapi import Depends, HTTPException, Header, status
+from jose import jwt, JWTError
+
+JWT_ALGORITHM = "HS256"
 
 # ----------------------------------------------
 # Dependencies - FastAPI Depends(...) Functions
@@ -42,3 +46,45 @@ def get_db():
         db.close() # <-- FastAPI runs this after the route returns/ends
 
 
+# def get_current_user_id(authorization: str = Header(None)) -> int:
+#     """
+#     Extract the JWT from the Authorization header and return the user_id
+#     stored inside the token payload.
+
+#     Expects header:  Authorization: Bearer token
+#     """
+#     if not authorization.startswith("Bearer "):
+#         raise HTTPException(
+#             status_code=status.HTTP_401_UNAUTHORIZED,
+#             detail="Invalid authorization header format",
+#         )
+#     token = authorization.split(" ", 1)[1]
+#     try:
+#         payload = jwt.decode(
+#             token,
+#             settings.JWT_SECRET,
+#             algorithms=[JWT_ALGORITHM],
+#         )
+#     except JWTError:
+#         raise HTTPException(
+#             status_code=status.HTTP_401_UNAUTHORIZED,
+#             detail="Invalid or expired token",
+#         )
+#     user_id = payload.get("user_id")
+#     if user_id is None:
+#         raise HTTPException(
+#             status_code=status.HTTP_401_UNAUTHORIZED,
+#             detail="Token missing user_id",
+#         )
+#     return int(user_id)
+
+def get_current_user_id(authorization: str = Header(None)) -> int:
+    """
+    TEMP DEV VERSION:
+    Do NOT validate JWT. Just return a fixed user id (1).
+
+    This is only to keep endpoints working for the demo
+    without dealing with JWT wiring. Replace with a real
+    decoder later.
+    """
+    return 1

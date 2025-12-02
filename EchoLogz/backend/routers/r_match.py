@@ -29,15 +29,16 @@ Modules using r_auth.py:
 """
 
 # INTERNAL MODULES:
-from backend.core.dependencies import get_db
+from backend.core.dependencies import get_db, get_current_user_id
 from backend.services.score import calc_compatibility
 from backend.services.spot_feature_vectors import build_feature_vector
-from backend.echoDB.db_schemas import IdentityResp
+from backend.echoDB.db_schemas import IdentityResp, RandomMatchResp
 
 # EXTERNAL MODULES:
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, Field
+from typing import Dict, Any
 
 
 
@@ -89,10 +90,10 @@ def post_compare(req: CompareReq, db: Session = Depends(get_db)):
             user_id=req.user_b_id,
             sample=req.sample,
         )
-        score = calc_compatibility(user_a_vec, user_b_vec) # Compute compatibility 
-        pair_id = None # look up / store a pair_id (?)
+        score = calc_compatibility(user_a_vec, user_b_vec)
+        pair_id = None
         return CompareResp(score=score, pair_id=pair_id)
-    except ValueError as e: # bad-input - features or math
+    except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(e),
@@ -133,3 +134,154 @@ def get_user_identity(
         labels=profile["labels"],
     )
 
+# ------------------------------------------------------------------
+# NEW: Random synthetic match for the logged-in user
+# ------------------------------------------------------------------
+# @router.post("/random", response_model=RandomMatchResp)
+# def post_random_match(
+#     db: Session = Depends(get_db),
+#     current_user_id: int = Depends(get_current_user_id),
+# ):
+#     """
+#     Generate a random synthetic user, compute compatibility against
+#     the logged-in user, and return the match score + fake profile.
+#     """
+
+#     # Real user profile
+#     real_profile = build_feature_vector(
+#         db=db,
+#         user_id=current_user_id,
+#         sample="medium_term",
+#     )
+
+#     if not real_profile:
+#         raise HTTPException(
+#             status_code=status.HTTP_400_BAD_REQUEST,
+#             detail="Unable to compute musical identity for current user.",
+#         )
+
+#     labels = real_profile["labels"]
+
+#     # Build a synthetic partner by sampling random [0,1] values
+#     import random
+
+#     fake_scaled = [random.random() for _ in labels]
+#     fake_raw = {label: value for label, value in zip(labels, fake_scaled)}
+#     fake_profile: Dict[str, Any] = {
+#         "labels": labels,
+#         "raw": fake_raw,
+#         "scaled": fake_scaled,
+#     }
+
+#     # Use your existing scoring engine
+#     score = calc_compatibility(real_profile, fake_profile)
+
+#     return RandomMatchResp(
+#         name="Random EchoLogz User",
+#         score=score,
+#         profile=fake_profile,
+#     )
+
+
+# @router.post("/random", response_model=RandomMatchResp)
+# def post_random_match(
+#     req: RandomReq,
+#     db: Session = Depends(get_db),
+# ):
+#     real_profile = build_feature_vector(
+#         db=db,
+#         user_id=req.user_id,
+#         sample="medium_term",
+#     )
+
+#     if not real_profile:
+#         raise HTTPException(
+#             status_code=status.HTTP_400_BAD_REQUEST,
+#             detail="Unable to compute musical identity for this user.",
+#         )
+
+#     labels = real_profile["labels"]
+
+#     import random
+#     fake_scaled = [random.random() for _ in labels]
+#     fake_raw = dict(zip(labels, fake_scaled))
+
+#     fake_profile: Dict[str, Any] = {
+#         "labels": labels,
+#         "raw": fake_raw,
+#         "scaled": fake_scaled,
+#     }
+
+#     # Build flat dicts (label -> scaled value) for compatibility calc
+#     real_vec = {
+#         label: value
+#         for label, value in zip(real_profile["labels"], real_profile["scaled"])
+#     }
+#     fake_vec = {
+#         label: value
+#         for label, value in zip(fake_profile["labels"], fake_profile["scaled"])
+#     }
+
+#     # Now calc_compatibility sees simple dicts of floats
+#     score = calc_compatibility(real_vec, fake_vec)
+
+#     return RandomMatchResp(
+#         name="Random EchoLogz User",
+#         score=score,
+#         profile=fake_profile,
+#     )
+
+
+@router.post("/random", response_model=RandomMatchResp)
+def post_random_match(
+    db: Session = Depends(get_db),
+    current_user_id: int = Depends(get_current_user_id),
+):
+    """
+    Generate a random synthetic user, compute compatibility against
+    the logged-in user (stubbed as id=1), and return score + fake profile.
+    """
+
+    # Real user profile from our builder
+    real_profile = build_feature_vector(
+        db=db,
+        user_id=current_user_id,
+        sample="medium_term",
+    )
+
+    if not real_profile:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Unable to compute musical identity for current user.",
+        )
+
+    labels = real_profile["labels"]
+
+    # Fake partner: random scaled values in [0,1]
+    import random
+
+    fake_scaled = [random.random() for _ in labels]
+    fake_raw = dict(zip(labels, fake_scaled))
+    fake_profile: Dict[str, Any] = {
+        "labels": labels,
+        "raw": fake_raw,
+        "scaled": fake_scaled,
+    }
+
+    # calc_compatibility expects flat dicts: {feature: value}
+    real_vec = {
+        label: value
+        for label, value in zip(real_profile["labels"], real_profile["scaled"])
+    }
+    fake_vec = {
+        label: value
+        for label, value in zip(fake_profile["labels"], fake_profile["scaled"])
+    }
+
+    score = calc_compatibility(real_vec, fake_vec)
+
+    return RandomMatchResp(
+        name="Random EchoLogz User",
+        score=score,
+        profile=fake_profile,
+    )
