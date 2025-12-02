@@ -5,7 +5,7 @@ TestClient: let's you fake HTTP requests to your FastAPI app
 from fastapi.testclient import TestClient
 from backend.main import app
 from backend.echoDB import db_schemas, db_session, db_crud
-from backend.core.security import hash_password
+from backend.core.security import _hash_password
 
 # ----------------------------------------------------------------------------------------
 client = TestClient(app) # fake API client
@@ -23,7 +23,7 @@ def setup_test_user():
         "password": test_password
     }
     # Create test user w/ real CRUD function
-    hashed = hash_password(fake_user["password"])
+    hashed = _hash_password(fake_user["password"])
     db_crud.create_user_with_hash(
         db=db,
         username=fake_user["username"],
