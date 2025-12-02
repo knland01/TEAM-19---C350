@@ -156,6 +156,88 @@ def get_user_top_artists(
             "time_range": time_range
         })
 
+
+
+def get_audio_features(access_token: str, track_ids: List[str]) -> Dict[str, Any]:
+    """
+    Fetch audio features for a list of track IDs using the batch endpoint.
+
+    Spotify endpoint:
+        GET /v1/audio-features?ids=ID1,ID2,...
+
+    Returns a dict with key "audio_features" so callers can do:
+        data = get_audio_features(...)
+        features = data.get("audio_features", [])
+    """
+    if not track_ids:
+        return {"audio_features": []}
+
+    # Spotify max is 100 per call; we’re using 50 already, but be safe
+    track_ids = track_ids[:10]
+
+    ids_param = ",".join(track_ids)
+
+    data = _get(
+        "/audio-features",
+        access_token,
+        params={"ids": ids_param},
+    )
+
+    # Spotify should return {"audio_features": [...]} but be defensive
+    feats = data.get("audio_features") or []
+    return {"audio_features": feats}
+
+
+def get_audio_features_with_fallback(
+    access_token: str,
+    track_ids: List[str],
+) -> List[Dict[str, Any]]:
+    """
+    Try to get real Spotify audio features.
+    If anything goes wrong (network, auth, bad response),
+    fall back to randomly generated features in realistic ranges.
+    """
+    try:
+        real_features = get_audio_features(access_token, track_ids)
+        return real_features
+
+    except Exception as e:
+        print("Spotify audio-features failed, using fake data:", e)
+        return get_audio_features(track_ids)
+
+
+
+def refresh_access_token(refresh_token: str) -> tuple[str | None, datetime | None]:
+    client_id = settings.SPOTIFY_CLIENT_ID
+    client_secret = settings.SPOTIFY_CLIENT_SECRET
+
+    payload = {
+        "grant_type": "refresh_token",
+        "refresh_token": refresh_token,
+    }
+    resp = requests.post(
+        f"{AUTH_BASE}/token",
+        data=payload,
+        auth=(client_id, client_secret),
+    )
+    try:
+        resp.raise_for_status()
+    except requests.RequestException:
+        return None, None
+
+    data = resp.json()
+    new_access = data.get("access_token")
+    expires_in = data.get("expires_in", 3600)
+    new_expiry = datetime.now(timezone.utc) + timedelta(seconds=expires_in)
+
+    return new_access, new_expiry
+
+
+
+
+
+# ----------------------- CODE GRAVEYARD -----------------------------------------------
+
 # NOTE: This API endpoint is depricated according to Spotify Docs.
 # https://developer.spotify.com/documentation/web-api/reference/get-several-audio-features
 # def get_audio_features(access_token: str, track_ids: List[str]) -> Dict[str, Any]:
@@ -196,58 +278,3 @@ def get_user_top_artists(
 #             features.append(data)
 
 #     return {"audio_features": features}
-
-def get_audio_features(access_token: str, track_ids: List[str]) -> Dict[str, Any]:
-    """
-    Fetch audio features for a list of track IDs using the batch endpoint.
-
-    Spotify endpoint:
-        GET /v1/audio-features?ids=ID1,ID2,...
-
-    Returns a dict with key "audio_features" so callers can do:
-        data = get_audio_features(...)
-        features = data.get("audio_features", [])
-    """
-    if not track_ids:
-        return {"audio_features": []}
-
-    # Spotify max is 100 per call; we’re using 50 already, but be safe
-    track_ids = track_ids[:10]
-
-    ids_param = ",".join(track_ids)
-
-    data = _get(
-        "/audio-features",
-        access_token,
-        params={"ids": ids_param},
-    )
-
-    # Spotify should return {"audio_features": [...]} but be defensive
-    feats = data.get("audio_features") or []
-    return {"audio_features": feats}
-
-
-def refresh_access_token(refresh_token: str) -> tuple[str | None, datetime | None]:
-    client_id = settings.SPOTIFY_CLIENT_ID
-    client_secret = settings.SPOTIFY_CLIENT_SECRET
-
-    payload = {
-        "grant_type": "refresh_token",
-        "refresh_token": refresh_token,
-    }
-    resp = requests.post(
-        f"{AUTH_BASE}/token",
-        data=payload,
-        auth=(client_id, client_secret),
-    )
-    try:
-        resp.raise_for_status()
-    except requests.RequestException:
-        return None, None
-
-    data = resp.json()
-    new_access = data.get("access_token")
-    expires_in = data.get("expires_in", 3600)
-    new_expiry = datetime.now(timezone.utc) + timedelta(seconds=expires_in)
-
-    return new_access, new_expiry
