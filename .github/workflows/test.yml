@@ -49,4 +49,4 @@ jobs:
 
       - name: Run backend tests
         run: |
-          PYTHONPATH=EchoLogz pytest EchoLogz/tests
+          PYTHONPATH=EchoLogz python -m pytest EchoLogz/tests
