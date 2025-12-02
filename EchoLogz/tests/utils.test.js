@@ -1,4 +1,4 @@
-import { validateEmail, validatePassword, passwordsMatch } from "../js/utils.js";
+import { validateEmail, validatePassword, passwordsMatch } from "../frontend-react/src/utils.js";
 
 test("validateEmail accepts well-formed emails", () => {
     expect(validateEmail("test@example.com")).toBe(true);
